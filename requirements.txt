@@ -1,3 +1,9 @@
+# PDF generation
+fpdf2>=2.7.9
+
+# Multilingual translation (uses Google Translate free tier, no API key)
+deep-translator>=1.11.4
+
 # Core AI / LLM
 groq>=0.9.0
 langchain==0.3.26
