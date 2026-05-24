@@ -5,27 +5,36 @@ from datetime import datetime
 _FILE = os.path.join("data", "medical_history.json")
 
 
-def save_session(messages: list, severity: str = "MILD") -> None:
-    """Append the current session to the history file."""
+def save_session(messages: list, severity: str = "MILD", session_id: str = None) -> None:
+    """Upsert the current session in the history file (one entry per session_id)."""
     if not messages:
         return
 
-    user_msgs  = [m["content"] for m in messages if m["role"] == "user"]
-    ai_msgs    = [m["content"] for m in messages if m["role"] == "assistant"]
+    user_msgs = [m["content"] for m in messages if m["role"] == "user"]
+    ai_msgs   = [m["content"] for m in messages if m["role"] == "assistant"]
 
+    _id = session_id or datetime.now().strftime("%Y%m%d_%H%M%S")
     entry = {
-        "id":            datetime.now().strftime("%Y%m%d_%H%M%S"),
-        "date_display":  datetime.now().strftime("%d %b %Y, %I:%M %p"),
-        "timestamp":     datetime.now().isoformat(),
+        "id":             _id,
+        "date_display":   datetime.now().strftime("%d %b %Y, %I:%M %p"),
+        "timestamp":      datetime.now().isoformat(),
         "main_complaint": (user_msgs[0] if user_msgs else "Unknown")[:150],
-        "severity":      severity,
-        "turns":         len(user_msgs),
-        "ai_summary":    (ai_msgs[0] if ai_msgs else "")[:300],
+        "severity":       severity,
+        "turns":          len(user_msgs),
+        "ai_summary":     (ai_msgs[0] if ai_msgs else "")[:300],
     }
 
     history = load_history()
-    history.insert(0, entry)   # newest first
-    history = history[:50]     # keep last 50 sessions
+
+    # Update existing entry with same session_id, or prepend a new one
+    for i, existing in enumerate(history):
+        if existing.get("id") == _id:
+            history[i] = entry
+            break
+    else:
+        history.insert(0, entry)
+
+    history = history[:50]
 
     os.makedirs("data", exist_ok=True)
     with open(_FILE, "w", encoding="utf-8") as f:

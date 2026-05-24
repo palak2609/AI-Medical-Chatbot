@@ -7,6 +7,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ── API key guard — fail fast with a clear message ────────────────────────────
+_missing = [k for k in ("GROQ_API_KEY", "PINECONE_API_KEY") if not os.getenv(k)]
+if _missing:
+    st.set_page_config(page_title="AI Medical Assistant", page_icon="🏥")
+    st.error(
+        f"**Missing API keys:** {', '.join(_missing)}\n\n"
+        "Add them to your `.env` file and restart the app:\n"
+        "```\nGROQ_API_KEY=your_key_here\nPINECONE_API_KEY=your_key_here\n```"
+    )
+    st.stop()
+
 from src.multimodal      import process
 from src.context_engine  import get_user_location, get_weather, get_season
 from src.first_aid       import get_card as get_first_aid_card, all_cards, render_html as fa_html
@@ -14,6 +25,7 @@ from src.history         import save_session, load_history, clear_history
 from src.pdf_report      import generate_report
 from src.translator      import LANGUAGES, to_english, from_english
 from src.report_analyzer import analyze_pdf, analyze_image_report
+from src.voice_output    import text_to_speech
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
@@ -144,6 +156,9 @@ _defaults = {
     "trigger_analyze":     False,
     "lang_code":           "en",
     "worst_severity":      "MILD",
+    "session_id":          datetime.now().strftime("%Y%m%d_%H%M%S_%f"),
+    "voice_output":        True,
+    "patient_profile":     {"name": "", "age": "", "conditions": ""},
 }
 for k, v in _defaults.items():
     if k not in st.session_state:
@@ -205,6 +220,29 @@ with st.sidebar:
         label_visibility="collapsed",
     )
     st.session_state.lang_code = LANGUAGES[_lang_name]
+
+    st.divider()
+
+    # ── Voice output toggle ───────────────────────────────────────────────────
+    st.markdown("### 🔊 Voice Output")
+    st.session_state.voice_output = st.toggle(
+        "Read responses aloud", value=st.session_state.voice_output
+    )
+
+    st.divider()
+
+    # ── Patient profile ───────────────────────────────────────────────────────
+    with st.expander("👤 Patient Profile", expanded=False):
+        st.caption("Helps the AI give more personalised answers.")
+        _p = st.session_state.patient_profile
+        _p["name"] = st.text_input("Name", value=_p["name"], placeholder="e.g. Rahul")
+        _p["age"]  = st.text_input("Age", value=_p["age"], placeholder="e.g. 32")
+        _p["conditions"] = st.text_area(
+            "Existing conditions / medications",
+            value=_p["conditions"],
+            placeholder="e.g. Diabetic, on Metformin",
+            height=80,
+        )
 
     st.divider()
 
@@ -317,13 +355,19 @@ with st.sidebar:
 
     # ── New Conversation ──────────────────────────────────────────────────────
     if st.button("✨ New Conversation", use_container_width=True):
+        # Final save of the outgoing session, then reset for the new one
         if st.session_state.messages:
-            save_session(st.session_state.messages, st.session_state.worst_severity)
+            save_session(
+                st.session_state.messages,
+                st.session_state.worst_severity,
+                session_id=st.session_state.session_id,
+            )
         st.session_state.messages            = []
         st.session_state.pending_audio_bytes = None
         st.session_state.pending_image_bytes = None
         st.session_state.worst_severity      = "MILD"
         st.session_state.file_key           += 1
+        st.session_state.session_id          = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         st.rerun()
 
     st.divider()
@@ -492,9 +536,11 @@ def _update_worst_severity(sev: str):
 
 
 def run_analysis(prompt_text: str):
-    lang   = st.session_state.lang_code
-    _has_a = st.session_state.pending_audio_bytes is not None
-    _has_i = st.session_state.pending_image_bytes is not None
+    lang      = st.session_state.lang_code
+    # Derive display name from code — no implicit global dependency
+    lang_name = next((k for k, v in LANGUAGES.items() if v == lang), "English")
+    _has_a    = st.session_state.pending_audio_bytes is not None
+    _has_i    = st.session_state.pending_image_bytes is not None
 
     _display = prompt_text or ("🎤 Voice message" if _has_a else "")
     if _has_i:
@@ -520,10 +566,24 @@ def run_analysis(prompt_text: str):
             tmp_image = _t.name
 
         _eng_text = to_english(prompt_text, lang) if prompt_text else prompt_text
-        _history  = [
+
+        # Prepend patient profile to query if filled in
+        _profile = st.session_state.patient_profile
+        if _profile["name"] or _profile["age"] or _profile["conditions"]:
+            _pinfo = (
+                f"[Patient: {_profile['name'] or 'Unknown'}, "
+                f"Age: {_profile['age'] or 'Unknown'}, "
+                f"Conditions: {_profile['conditions'] or 'None'}] "
+            )
+            _eng_text = (_pinfo + (_eng_text or "")).strip() if _eng_text else _pinfo.strip()
+
+        _history = [
             {"role": m["role"], "content": m["content"]}
             for m in st.session_state.messages[:-1]
         ]
+
+        # Country for localised emergency numbers
+        _country = _env["location"]["country"] if _env else ""
 
         with st.chat_message("assistant", avatar="🤖"):
             if _fa_rendered:
@@ -535,19 +595,29 @@ def run_analysis(prompt_text: str):
                     text_input=_eng_text,
                     image_path=tmp_image,
                     conversation_history=_history,
+                    country=_country,
                 )
 
             _response_display = _result["response"]
             if lang != "en":
-                with st.spinner(f"Translating to {_lang_name}…"):
+                with st.spinner(f"Translating to {lang_name}…"):
                     _response_display = from_english(_result["response"], lang)
 
             _sev = _result["severity"]
             _icon, _cls = _SEV_STYLE.get(_sev, ("✅", "badge-MILD"))
             st.markdown(f'<span class="badge {_cls}">{_icon} {_sev}</span>', unsafe_allow_html=True)
             st.markdown(_response_display)
-            if _result.get("audio_bytes"):
-                st.audio(_result["audio_bytes"], format="audio/mp3")
+
+            # Voice output — only if toggle is on
+            _audio_bytes = None
+            if st.session_state.voice_output:
+                with st.spinner("Generating audio…"):
+                    try:
+                        _audio_bytes = text_to_speech(_result["response"])
+                    except Exception:
+                        _audio_bytes = None
+            if _audio_bytes:
+                st.audio(_audio_bytes, format="audio/mp3")
 
         if _result["query"] and tmp_audio:
             st.session_state.messages[-1]["content"] = f'🎤 *"{_result["query"]}"*'
@@ -557,10 +627,15 @@ def run_analysis(prompt_text: str):
             "role":           "assistant",
             "content":        _response_display,
             "severity":       _result["severity"],
-            "audio_bytes":    _result.get("audio_bytes"),
+            "audio_bytes":    _audio_bytes,
             "first_aid_html": _fa_rendered,
         })
-        save_session(st.session_state.messages, st.session_state.worst_severity)
+        # Upsert — same session_id updates the same history entry
+        save_session(
+            st.session_state.messages,
+            st.session_state.worst_severity,
+            session_id=st.session_state.session_id,
+        )
 
     finally:
         for _p in [tmp_audio, tmp_image]:

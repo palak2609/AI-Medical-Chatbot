@@ -23,14 +23,18 @@ _LEVELS = ["EMERGENCY", "SEVERE", "MODERATE", "MILD"]
 def detect_severity(text: str) -> str:
     text_lower = text.lower()
 
+    # Fast keyword path — most common cases resolved without an LLM call
     for kw in _EMERGENCY_KW:
         if kw in text_lower:
             return "EMERGENCY"
     for kw in _SEVERE_KW:
         if kw in text_lower:
             return "SEVERE"
+    for kw in _MODERATE_KW:
+        if kw in text_lower:
+            return "MODERATE"
 
-    # LLM pass for nuanced classification
+    # LLM only for ambiguous inputs that matched no keyword
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         resp = client.chat.completions.create(
@@ -55,10 +59,5 @@ def detect_severity(text: str) -> str:
                 return level
     except Exception:
         pass
-
-    # Keyword fallback for moderate
-    for kw in _MODERATE_KW:
-        if kw in text_lower:
-            return "MODERATE"
 
     return "MILD"
