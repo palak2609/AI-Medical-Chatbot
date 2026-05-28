@@ -36,7 +36,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from pypdf import PdfReader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
@@ -144,7 +144,7 @@ def ingest(force: bool = False):
         path = os.path.join(DATA_DIR, f)
         fhash = _file_hash(path)
         if not force and state.get(f) == fhash:
-            print(f"  ✓ Already ingested: {f}")
+            print(f"  [skip] Already ingested: {f}")
         else:
             to_ingest.append((f, path, fhash))
 
@@ -169,7 +169,7 @@ def ingest(force: bool = False):
 
         chunks = _extract_chunks(path, filename)
         if not chunks:
-            print(f"  ⚠ No extractable text found. Skipping.")
+            print(f"  [warn] No extractable text found. Skipping.")
             continue
 
         print(f"  Extracted {len(chunks)} chunks from PDF")
@@ -183,13 +183,13 @@ def ingest(force: bool = False):
             store.add_documents(batch)
             time.sleep(0.5)  # gentle rate limiting
 
-        print(f"  ✅ Done: {len(chunks)} chunks uploaded for {filename}      ")
+        print(f"  DONE: {len(chunks)} chunks uploaded for {filename}      ")
 
         # Mark as ingested
         state[filename] = fhash
         _save_state(state)
 
-    print(f"\n✅ Ingestion complete.")
+    print(f"\nIngestion complete.")
 
     # Show updated index stats
     stats = index.describe_index_stats()
