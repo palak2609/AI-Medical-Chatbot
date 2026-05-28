@@ -1,0 +1,292 @@
+{
+  "summary": {
+    "avg_rag_score": 4.92,
+    "avg_llm_score": 5.0,
+    "improvement_pct": -1.6,
+    "rag_wins": 18,
+    "llm_wins": 2,
+    "total_questions": 20,
+    "knowledge_sources": [
+      "Gale Encyclopedia of Medicine",
+      "WHO Essential Medicines List (2023)",
+      "WHO Model Formulary"
+    ],
+    "model": "llama-3.1-8b-instant (Groq)",
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "vector_db": "Pinecone Serverless"
+  },
+  "results": [
+    {
+      "category": "Common Diseases",
+      "question": "What are the symptoms and treatment for dengue fever?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response accurately and specifically describes the symptoms, treatment, and precautions for dengue fever, clearly referencing established medical knowledge.",
+      "llm_note": "The response accurately and specifically describes the symptoms and treatment of dengue fever, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** Dengue Fever\n\n**Symptoms Identified:**\n- Fever\n- Headache\n- Muscle and joint pain\n- Rash\n- Severe fatigue\n- Swelling in the brain (encephalitis) in severe cases\n\n**Possible Causes:**\n- The patient has a history of tick or mosquito bites, and knowledge that the patient has been in an area known to harbor the arbovirus (Dengue virus)\n- The patient's symptoms match those described for Dengue Fever\n\n**Recommended Precautions:**\n- Avoid contact with mosquitoes to prevent furth",
+      "llm_response": "Dengue fever is a viral infection that can cause a range of symptoms. Some common symptoms include:\n\n1. High fever: This is usually the first symptom to appear and can last for several days.\n2. Severe headache: The headache can be intense and may be accompanied by sensitivity to light.\n3. Muscle and joint pain: This can be quite severe and may make it difficult to move or perform daily activities.\n4. Rash: A characteristic rash may appear on the skin, which can be itchy and uncomfortable.\n5. Nau"
+    },
+    {
+      "category": "Common Diseases",
+      "question": "How is typhoid fever diagnosed and treated?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides a comprehensive and accurate description of typhoid fever diagnosis and treatment, referencing established medical knowledge and providing specific recommendations.",
+      "llm_note": "The response accurately and thoroughly describes the diagnosis and treatment of typhoid fever, referencing established medical knowledge and specific medications.",
+      "rag_response": "**Possible Condition:** Typhoid fever\n\n**Symptoms Identified:**\n- Fever\n- Headache\n- Fatigue\n- Abdominal pain\n- Diarrhea or constipation\n- Rash\n\n**Possible Causes:**\n- Salmonella Typhi infection, transmitted via the faecal–oral route, associated with poor hygiene and sanitation\n- Laboratory workers handling specimens from suspected cases\n\n**Recommended Precautions:**\n- Practice good hygiene, wash hands frequently with soap and water\n- Avoid close contact with individuals who may be infected\n- Ma",
+      "llm_response": "Typhoid fever is a bacterial infection caused by Salmonella Typhi. As a medical assistant, I'll walk you through the diagnosis and treatment process.\n\n**Diagnosis:**\n\nTo diagnose typhoid fever, your doctor will typically perform the following steps:\n\n1. **Medical history:** Your doctor will ask about your symptoms, travel history, and any recent exposure to contaminated food or water.\n2. **Physical examination:** Your doctor will perform a physical examination to check for signs of infection, su"
+    },
+    {
+      "category": "Common Diseases",
+      "question": "What causes malaria and what medicines are used to treat it?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides a comprehensive and accurate overview of malaria, including its causes, symptoms, treatment, and precautions, with clear references to established medical knowledge.",
+      "llm_note": "The response provides a comprehensive and accurate explanation of malaria causes and treatment options, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** Malaria\n\n**Symptoms Identified:**\n- Fever\n- Chills\n- Flu-like symptoms\n- Nausea and vomiting\n- Diarrhea\n- Abdominal pain\n- Fatigue\n- Headache\n- Rash\n- Muscle pain\n- Muscle weakness\n\n**Possible Causes:**\n- Malaria is caused by four species of plasmodial parasites: Plasmodium vivax, Plasmodium falciparum, Plasmodium ovale, and Plasmodium malariae. These parasites are transmitted through the bite of an infected anopheline mosquito.\n\n**Recommended Precautions:**\n- Prevent mos",
+      "llm_response": "Malaria is a serious and sometimes life-threatening disease caused by a parasite that is transmitted through the bite of an infected mosquito. The parasite, called Plasmodium, is usually spread by the female Anopheles mosquito.\n\nThe parasite enters the human body when an infected mosquito bites and injects its saliva into the person's bloodstream. Once inside the body, the parasite travels to the liver and then to the red blood cells, where it multiplies and causes the cells to rupture, leading "
+    },
+    {
+      "category": "Common Diseases",
+      "question": "What are the early warning signs of type 2 diabetes?",
+      "rag_score": 4.3,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response accurately lists common symptoms and risk factors of type 2 diabetes, but lacks specificity in some areas and does not provide clear medical terminology or references.",
+      "llm_note": "The response accurately lists the common symptoms of type 2 diabetes and emphasizes the importance of regular check-ups and screenings.",
+      "rag_response": "**Possible Condition:** Type 2 Diabetes\n\n**Symptoms Identified:**\n- Fatigue\n- Altered blood lipids\n- Cholestatic jaundice\n- Glucose intolerance\n- Rash and chloasma\n- Changes in libido\n- Depression\n- Headache\n- Migraine\n- Dizziness\n- Leg cramps\n\n**Possible Causes:**\n- Insulin resistance or impaired insulin secretion\n- Genetic predisposition\n- Obesity or being overweight\n- Physical inactivity\n- Poor diet or high sugar intake\n- Family history of diabetes\n\n**Recommended Precautions:**\n- Maintain a h",
+      "llm_response": "As a medical assistant, I can tell you that the early warning signs of type 2 diabetes may not always be noticeable, but some common symptoms include:\n\n1. Increased thirst and hunger: When your body can't use insulin properly, it may produce more glucose in your urine, leading to increased thirst and hunger.\n2. Fatigue: High blood sugar levels can cause fatigue, which is a feeling of being extremely tired or weak.\n3. Frequent urination: As your body tries to flush out excess glucose, you may fin"
+    },
+    {
+      "category": "Medicines & Dosages",
+      "question": "What is the standard adult dosage of paracetamol and when should it not be used?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine",
+        "WHO Essential Medicines List (2023)"
+      ],
+      "rag_note": "The AI provided a clear and accurate response with specific dosages and contraindications, referencing established medical knowledge.",
+      "llm_note": "The response accurately and specifically states the standard adult dosage of paracetamol and its contraindications, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** None specified, but general information about paracetamol dosage.\n\n**Symptoms Identified:** None specified.\n\n**Possible Causes:** None specified.\n\n**Recommended Precautions:**\n- The standard adult dosage of paracetamol is 0.5–1 g every 4–6 hours, with a maximum of 4 g daily.\n- Paracetamol should not be used for more than four months at a time because its effects can wear off.\n- Paracetamol should not be used for mild to moderate pain and pyrexia in adults unless advised b",
+      "llm_response": "As a medical assistant, I can tell you that the standard adult dosage of paracetamol is 500-1000 milligrams every 4-6 hours as needed, but not to exceed 4000 milligrams in a 24-hour period.\n\nHowever, please note that this dosage may vary depending on the individual's medical condition and other medications they may be taking. It's always best to consult with a doctor or a pharmacist for personalized advice.\n\nAs for when paracetamol should not be used, it's generally not recommended for individua"
+    },
+    {
+      "category": "Medicines & Dosages",
+      "question": "What is amoxicillin used for and what are its common side effects?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The AI provides a comprehensive and accurate response that clearly references established medical knowledge.",
+      "llm_note": "The response accurately and thoroughly describes the uses and common side effects of amoxicillin, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** Bacterial Infections\n\n**Symptoms Identified:** \n- Symptoms of a bacterial infection (not specified)\n\n**Possible Causes:** \n- Bacterial infections due to beta-lactamase-producing bacteria\n- Respiratory tract infections\n- Otitis media (middle ear infection)\n- Genitourinary and abdominal infections\n- Cellulitis (skin infection)\n- Animal bites\n- Severe dental infections\n- Haemophilus influenzae osteomyelitis (bone infection)\n\n**Recommended Precautions:**\n- History of allergy ",
+      "llm_response": "Amoxicillin is an antibiotic medication that belongs to the penicillin class. It's commonly used to treat various bacterial infections, such as:\n\n1. Respiratory tract infections (like pneumonia, bronchitis, and sinusitis)\n2. Skin and soft tissue infections (like cellulitis and abscesses)\n3. Urinary tract infections (like cystitis and pyelonephritis)\n4. Ear infections (like otitis media)\n5. Dental infections (like abscesses and gum infections)\n\nAmoxicillin works by killing or inhibiting the growt"
+    },
+    {
+      "category": "Medicines & Dosages",
+      "question": "What medicines are used to treat hypertension and how do they work?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides a comprehensive and accurate explanation of hypertension, its symptoms, causes, and treatments, with specific references to established medical knowledge and medication names.",
+      "llm_note": "The response provides accurate and detailed information about the types of medications used to treat hypertension, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** Hypertension\n\n**Symptoms Identified:**\n- High blood pressure\n- Dizziness or lightheadedness\n- Headaches\n- Nosebleeds\n- Shortness of breath\n\n**Possible Causes:**\n- Genetics\n- Obesity\n- Lack of physical activity\n- High sodium intake\n- Stress\n- Certain medical conditions (e.g., kidney disease, sleep apnea)\n\n**Recommended Precautions:**\n- Reduce sodium intake\n- Increase physical activity (e.g., walking, swimming)\n- Lose weight if overweight or obese\n- Quit smoking\n- Manage st",
+      "llm_response": "As a medical assistant, I can provide you with general information about the types of medications used to treat hypertension. However, please note that it's always best to consult with a healthcare professional for personalized advice.\n\nThere are several classes of medications used to treat hypertension, and each works in a different way. Here are some of the most common ones:\n\n1. **Diuretics**: These medications help your body get rid of excess fluid by increasing urine production. Examples inc"
+    },
+    {
+      "category": "Medicines & Dosages",
+      "question": "What is metformin and why is it prescribed for diabetes?",
+      "rag_score": 4,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides accurate and specific information about metformin, but lacks a clear explanation of why it is prescribed for diabetes.",
+      "llm_note": "Comprehensive and accurate explanation of metformin's mechanism and benefits in managing type 2 diabetes.",
+      "rag_response": "**Possible Condition:** Diabetes Mellitus (Type 2)\n\n**Symptoms Identified:** Elevated blood glucose levels, insulin resistance, and impaired glucose metabolism\n\n**Possible Causes:**\n- Insulin resistance, causing high blood glucose levels\n- Impaired glucose metabolism, leading to high blood glucose levels\n\n**Recommended Precautions:**\n- Monitor blood glucose levels regularly\n- Maintain a healthy diet and exercise routine\n- Manage stress levels\n- Avoid smoking and excessive alcohol consumption\n\n**",
+      "llm_response": "Metformin is a type of medication that's commonly prescribed to help manage blood sugar levels in people with type 2 diabetes. It belongs to a class of medications called biguanides.\n\nMetformin works by reducing the amount of glucose produced by the liver and increasing the body's sensitivity to insulin, which helps glucose enter the cells. This helps lower blood sugar levels and makes it easier for the body to use insulin.\n\nOne of the main reasons metformin is prescribed for diabetes is that it"
+    },
+    {
+      "category": "India-Specific Health",
+      "question": "How can I prevent waterborne diseases during monsoon season?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides a comprehensive and accurate list of waterborne diseases, symptoms, causes, and prevention measures, clearly referencing established medical knowledge.",
+      "llm_note": "The response provides a comprehensive and accurate list of precautions to prevent waterborne diseases during monsoon season, grounded in established medical knowledge.",
+      "rag_response": "**Possible Condition:** Waterborne diseases (e.g., Vent balantidiasis, Amebiasis)\n\n**Symptoms Identified:**\n- Diarrhea\n- Abdominal cramps\n- Fever\n- Vomiting\n\n**Possible Causes:**\n- Contaminated drinking water\n- Poor hygiene practices\n- Inadequate water treatment\n\n**Recommended Precautions:**\n- Purification of drinking water using:\n  • Filtering\n  • Boiling\n  • Treatment with iodine\n- Proper food handling to avoid contamination\n- Washing hands frequently, especially after using the bathroom\n- Avo",
+      "llm_response": "As a medical assistant, I would advise you to take the following precautions to prevent waterborne diseases during the monsoon season:\n\n1. **Use clean drinking water**: Make sure to drink water from a trusted source, such as bottled water or filtered water. Avoid drinking tap water, as it may be contaminated with bacteria, viruses, or other pathogens.\n\n2. **Use a water filter**: If you're using tap water, consider installing a water filter at home. This can help remove impurities and contaminant"
+    },
+    {
+      "category": "India-Specific Health",
+      "question": "What are the symptoms of chikungunya and how is it managed?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The AI provides a comprehensive and accurate response that clearly references established medical knowledge and offers specific guidance on symptoms, management, and precautions.",
+      "llm_note": "The response accurately and thoroughly describes the symptoms and management of chikungunya, referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** Chikungunya\n\n**Symptoms Identified:**\n- Severe or continuing headache\n- Sore throat and fever, with or without chills\n- Dizziness\n- Unusual tiredness or weakness\n- Weight gain\n- Painful, bluish or purplish fingers or toes\n- Puffy or swollen eyelids, face, feet, or lower legs\n- Yellow eyes or skin\n\n**Possible Causes:**\n- Chikungunya virus infection\n\n**Recommended Precautions:**\n- Rest and hydration to manage symptoms\n- Pain management using over-the-counter pain relievers ",
+      "llm_response": "Chikungunya is a viral illness that's spread by mosquitoes. The symptoms usually start within 3 to 7 days after being bitten by an infected mosquito.\n\nCommon symptoms of chikungunya include:\n\n1. Severe joint pain or swelling, especially in the hands, feet, wrists, and ankles. This is often the most uncomfortable symptom.\n2. Fever, which can be high.\n3. Headache\n4. Muscle pain\n5. Joint stiffness\n6. Rash, which can appear on the skin\n7. Swollen lymph nodes\n\nIn some cases, people may also experienc"
+    },
+    {
+      "category": "India-Specific Health",
+      "question": "What is the treatment for severe dehydration from diarrhea?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response accurately and thoroughly describes the treatment and precautions for severe dehydration from diarrhea, referencing established medical knowledge and providing specific examples of fluids and specialists to consult.",
+      "llm_note": "The response accurately and specifically describes the treatment for severe dehydration from diarrhea, clearly grounded in established medical knowledge.",
+      "rag_response": "**Possible Condition:** Severe Dehydration due to Diarrhea\n\n**Symptoms Identified:**\n- Decreased urination\n- Dizziness or lightheadedness\n- Dry mouth\n- Increased thirst\n- Wrinkled skin\n- Fever\n- Blood in the stool\n- Vomiting\n- Cramps or tenderness in the abdomen\n\n**Possible Causes:**\n- Diarrhea due to viral or bacterial infection\n- Antibiotic-associated colitis (Clostridium difficile)\n\n**Recommended Precautions:**\n- Replace lost fluids and electrolytes (sodium, calcium, and potassium) promptly\n-",
+      "llm_response": "Severe dehydration from diarrhea is a serious condition that requires immediate medical attention. As a medical assistant, I can guide you on the general steps we would take to treat this condition.\n\nFirst, we would assess the severity of dehydration by checking your vital signs, such as blood pressure, pulse, and respiratory rate. We would also look for signs of dehydration, such as dry mouth, dark urine, and decreased urine output.\n\nTo treat severe dehydration, we would typically administer in"
+    },
+    {
+      "category": "India-Specific Health",
+      "question": "What foods should a diabetic patient in India avoid?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response accurately and specifically addresses the question, providing detailed recommendations and warnings grounded in established medical knowledge.",
+      "llm_note": "The response accurately and specifically lists foods to avoid for a diabetic patient in India, grounding the information in established medical knowledge.",
+      "rag_response": "**Possible Condition:** Diabetes Mellitus (Type 1 or 2)\n\n**Symptoms Identified:** \n- High blood glucose levels\n- Fatigue\n- Increased thirst and urination\n\n**Possible Causes:**\n- Insulin deficiency or resistance\n- Genetic predisposition\n- Obesity\n- Sedentary lifestyle\n\n**Recommended Precautions:**\n- Avoid high-glycemic index foods such as:\n  - White rice\n  - Refined flour\n  - Sugary drinks like colas and sweetened teas\n  - Processed snacks like chips and biscuits\n- Limit intake of:\n  - Fried food",
+      "llm_response": "As a medical assistant, I would advise a diabetic patient in India to avoid or limit the following foods:\n\n1. High-sugar foods: Avoid sweets like gulab jamun, jalebi, and barfi. Also, limit your consumption of sweetened beverages like sugarcane juice, lassi, and fruit juices.\n\n2. Refined carbohydrates: Limit your intake of white bread, polished rice, and maida-based products like naan, paratha, and biscuits.\n\n3. Fried foods: Fried foods like samosas, kachoris, and pakoras are high in calories an"
+    },
+    {
+      "category": "Clinical Guidance",
+      "question": "When should a patient with chest pain go to emergency versus wait for a doctor?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response accurately and specifically describes the symptoms, causes, and recommended actions for a patient with chest pain, clearly referencing established medical knowledge.",
+      "llm_note": "Response accurately and specifically describes emergency and non-emergency chest pain scenarios, grounded in established medical knowledge.",
+      "rag_response": "**Possible Condition:** Unstable Angina or Myocardial Infarction (Heart Attack)\n\n**Symptoms Identified:**\n- Chest pain or discomfort\n- Other symptoms: arm, back, neck, jaw, or stomach pain; shortness of breath; lightheadedness; cold sweat\n\n**Possible Causes:**\n- Reduced blood flow to the heart\n- Blood clots or plaque buildup in the coronary arteries\n\n**Recommended Precautions:**\n- Call emergency services immediately if the pain is severe, lasts more than 15 minutes, or is accompanied by shortnes",
+      "llm_response": "As a medical assistant, I would advise patients with chest pain to seek immediate medical attention in the emergency room if they experience any of the following symptoms:\n\n1. Severe chest pain that lasts for more than 15 minutes\n2. Sudden, severe chest pain that radiates to the arm, back, neck, jaw, or stomach\n3. Shortness of breath or difficulty breathing\n4. Cold sweats, nausea, or vomiting\n5. Dizziness or fainting\n6. A history of heart disease, high blood pressure, or previous heart attack\n7."
+    },
+    {
+      "category": "Clinical Guidance",
+      "question": "What are the normal ranges for blood pressure, blood sugar, and cholesterol?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine",
+        "WHO Model Formulary"
+      ],
+      "rag_note": "The response accurately and specifically provides established medical knowledge with clear references to relevant guidelines and organizations.",
+      "llm_note": "The response accurately and specifically provides established medical knowledge with clear references to normal ranges for blood pressure, blood sugar, and cholesterol.",
+      "rag_response": "**Normal Ranges:**\n\n* Blood Pressure:\n + Systolic blood pressure: Less than 140 mmHg\n + Diastolic blood pressure: Less than 90 mmHg\n* Blood Sugar:\n + Fasting plasma glucose: Less than 100 mg/dL (5.6 mmol/L)\n + Postprandial plasma glucose: Less than 140 mg/dL (7.8 mmol/L) 2 hours after eating\n* Cholesterol:\n + Total cholesterol: Less than 200 mg/dL\n + LDL (Bad) cholesterol: Less than 100 mg/dL\n + HDL (Good) cholesterol: Greater than 60 mg/dL\n + Triglycerides: Less than 150 mg/dL\n\n**Important Note",
+      "llm_response": "As a medical assistant, I can provide you with the general guidelines for normal ranges. However, please note that these may vary slightly depending on the specific guidelines or the healthcare provider's preferences.\n\nBlood Pressure:\n- Normal: Less than 120/80 mmHg\n- Elevated: 120-129/80 mmHg\n- Stage 1 Hypertension: 130-139/80-89 mmHg\n- Stage 2 Hypertension: 140 or higher/90 or higher mmHg\n\nBlood Sugar (Fasting):\n- Normal: Less than 100 mg/dL\n- Prediabetes: 100-125 mg/dL\n- Diabetes: 126 mg/dL o"
+    },
+    {
+      "category": "Clinical Guidance",
+      "question": "What specialist should a patient see for persistent lower back pain?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides a comprehensive and accurate evaluation of lower back pain, including possible causes, recommended specialists, and emergency warnings, all grounded in established medical knowledge.",
+      "llm_note": "The response accurately and specifically describes the roles of different specialists in treating persistent lower back pain, grounding the information in established medical knowledge.",
+      "rag_response": "**Possible Condition:** Lower Back Pain\n\n**Symptoms Identified:**\n- persistent lower back pain\n- difficulty expanding the chest (may be related to spinal issues)\n\n**Possible Causes:**\n- spinal issues, such as a herniated disc or spinal stenosis\n- conditions like Ankylosing Spondylitis (AS), which can cause lower back pain and difficulty expanding the chest\n\n**Recommended Precautions:**\n- Apply heat or cold packs to the affected area to reduce pain and stiffness\n- Engage in low-impact exercises, ",
+      "llm_response": "For persistent lower back pain, I would recommend that the patient see a specialist such as an Orthopedic Surgeon or a Physical Medicine and Rehabilitation (PM&R) physician, also known as a physiatrist. \n\nAn Orthopedic Surgeon would be a good option if the patient is experiencing structural issues such as a herniated disc, spinal stenosis, or a fracture. They can perform surgeries to correct these issues and provide guidance on rehabilitation.\n\nA PM&R physician, on the other hand, would be a goo"
+    },
+    {
+      "category": "Clinical Guidance",
+      "question": "How is asthma managed in adults and what triggers should be avoided?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response accurately and specifically describes asthma management and triggers, clearly referencing established medical knowledge.",
+      "llm_note": "The response is comprehensive, accurate, and grounded in established medical knowledge.",
+      "rag_response": "**Possible Condition:** Asthma\n\n**Symptoms Identified:**\n- Wheezing\n- Shortness of breath\n- Chest tightness\n- Coughing\n\n**Possible Causes:**\n- Allergenic materials (dust, pollen, pet dander)\n- Exposure to animal products, certain forms of plastic, wood dust, or metals\n- Sensitivity to aspirin and related drugs\n- Sinusitis or nasal polyps\n\n**Recommended Precautions:**\n- Identify and avoid triggers: Keep a symptom diary to track when symptoms occur and what may have caused them.\n- Use a peak flow ",
+      "llm_response": "As a medical assistant, I can provide you with general information about managing asthma in adults. \n\nAsthma is a chronic condition that affects the airways, causing inflammation, constriction, and difficulty breathing. Managing asthma involves a combination of medication, lifestyle changes, and avoiding triggers.\n\n**Medications:**\n\nThere are two main types of medications used to manage asthma: quick-relief medications and long-term control medications.\n\n1. **Quick-relief medications:** These me"
+    },
+    {
+      "category": "Lifestyle & Prevention",
+      "question": "What dietary changes help reduce high cholesterol?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides a comprehensive and accurate explanation of dietary changes to reduce high cholesterol, referencing established medical knowledge and including specific recommendations and precautions.",
+      "llm_note": "The response provides a comprehensive and evidence-based list of dietary changes to reduce high cholesterol, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** High Cholesterol\n\n**Symptoms Identified:**\n- High levels of low-density lipoprotein (LDL) cholesterol\n- High levels of triglycerides\n- High risk of cardiovascular disease\n\n**Possible Causes:**\n- Consuming a diet high in saturated fats and cholesterol\n- Consuming a diet high in dietary sugars\n- Lack of physical activity\n\n**Recommended Precautions:**\n\n1. **Reduce dietary sugar and saturated fats:** Limit foods high in added sugars, saturated fats, and cholesterol. Instead, ",
+      "llm_response": "As a medical assistant, I can recommend some general dietary changes that may help reduce high cholesterol. \n\nFirstly, it's essential to focus on a heart-healthy diet that includes plenty of fruits, vegetables, whole grains, and lean protein sources. \n\n1. **Increase soluble fiber intake**: Soluble fiber can help lower cholesterol levels by binding to bile acids and removing them from the body. Good sources of soluble fiber include oats, barley, fruits like apples and berries, and vegetables like"
+    },
+    {
+      "category": "Lifestyle & Prevention",
+      "question": "What are the signs of iron deficiency anaemia and how is it treated?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "This response accurately and specifically describes the signs and treatment of iron deficiency anemia, clearly referencing established medical knowledge.",
+      "llm_note": "The response accurately and thoroughly describes the signs and treatment of iron deficiency anemia, referencing established medical knowledge and providing specific details.",
+      "rag_response": "**Possible Condition:** Iron Deficiency Anemia\n\n**Symptoms Identified:**\n- Pale skin\n- Fatigue and weakness\n- Shortness of breath\n- Headaches\n- Dizziness or lightheadedness\n- Cold hands and feet\n- Poor appetite\n- Restless leg syndrome\n- Hair loss\n- Poor immune function\n\n**Possible Causes:**\n- Inadequate iron intake from diet\n- Iron deficiency due to chronic bleeding (e.g., heavy menstrual periods, ulcers, colon cancer)\n- Increased iron requirements due to pregnancy or growth and development\n- In",
+      "llm_response": "Iron deficiency anemia is a condition where your body doesn't have enough iron to produce healthy red blood cells. Some common signs of iron deficiency anemia include:\n\n1. Fatigue or weakness: You might feel tired or weak, even after getting enough rest.\n2. Shortness of breath: You might feel like you can't catch your breath, even when you're doing everyday activities.\n3. Pale skin: Your skin might look pale or washed out.\n4. Headaches: You might experience frequent or severe headaches.\n5. Dizzi"
+    },
+    {
+      "category": "Lifestyle & Prevention",
+      "question": "How much sleep do adults need and what are the health effects of sleep deprivation?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Model Formulary",
+        "Gale Encyclopedia of Medicine"
+      ],
+      "rag_note": "The response provides accurate, specific, and grounded information about recommended sleep duration and health effects of sleep deprivation, along with practical precautions and emergency warnings.",
+      "llm_note": "The response accurately and specifically describes established medical knowledge on sleep recommendations and health effects of sleep deprivation.",
+      "rag_response": "**Recommended Sleep Duration for Adults:**\n- The National Sleep Foundation recommends that adults aim for 7-9 hours of sleep each night.\n\n**Health Effects of Sleep Deprivation:**\n- Insomnia, myalgia, arthralgia, fatigue, headache, impaired concentration, irritability, anxiety, and depression are all linked to sleep deprivation.\n- Chronic sleep deprivation is associated with an increased risk of obesity, diabetes, cardiovascular disease, and a weakened immune system.\n- Prolonged sleep deprivation",
+      "llm_response": "As a medical assistant, I can tell you that the general recommendation for adults is to get 7-9 hours of sleep each night. This is based on research that shows that this amount of sleep is associated with the best health outcomes.\n\nSleep deprivation, on the other hand, can have a number of negative health effects. Some of the potential consequences of not getting enough sleep include:\n\n- Impaired cognitive function, including difficulty concentrating and making decisions\n- Increased risk of chro"
+    },
+    {
+      "category": "Lifestyle & Prevention",
+      "question": "What vaccinations are recommended for adults in India?",
+      "rag_score": 5.0,
+      "llm_score": 5.0,
+      "sources": [
+        "WHO Essential Medicines List (2023)",
+        "WHO Model Formulary"
+      ],
+      "rag_note": "The response accurately and specifically lists recommended vaccinations for adults in India, clearly referencing established medical knowledge from the World Health Organization.",
+      "llm_note": "The response accurately and specifically lists recommended vaccinations for adults in India, clearly referencing established medical knowledge.",
+      "rag_response": "**Possible Condition:** None applicable (vaccination recommendations)\n\n**Symptoms Identified:** None (vaccination recommendations)\n\n**Possible Causes:** Various vaccine-preventable diseases\n\n**Recommended Vaccinations for Adults in India:**\n\nBased on the World Health Organization (WHO) recommendations and considering India's epidemiological situation, the following vaccinations are recommended for adults:\n\n1. **Inactivated Poliovirus Vaccine (IPV)**: One-time dose for adults born after 1999 (if ",
+      "llm_response": "As a medical assistant, I can provide you with general information based on my knowledge and training.\n\nIn India, the vaccination recommendations for adults vary depending on several factors such as age, health status, occupation, and travel history. However, here are some commonly recommended vaccinations for adults in India:\n\n1. **Influenza (Flu) vaccine**: This is recommended annually for adults, especially those with underlying health conditions or weakened immune systems.\n2. **Hepatitis B v"
+    }
+  ]
+}

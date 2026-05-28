@@ -42,41 +42,134 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 .stApp {
     background-color: #0D1117;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
+section.main > div { padding-bottom: 110px; }
+hr { border-color: #21262D !important; opacity: 1 !important; }
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
 [data-testid="stSidebar"] {
     background-color: #010409 !important;
     border-right: 1px solid #21262D;
 }
 [data-testid="stSidebar"] .stMarkdown h2 {
-    color: #E6EDF3 !important; font-size: 19px !important; font-weight: 700 !important;
+    color: #E6EDF3 !important; font-size: 18px !important; font-weight: 700 !important;
 }
 [data-testid="stSidebar"] .stMarkdown h3 {
-    color: #58A6FF !important; font-size: 12px !important; font-weight: 600 !important;
-    text-transform: uppercase; letter-spacing: 1px;
+    color: #58A6FF !important; font-size: 11px !important; font-weight: 700 !important;
+    text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px !important;
 }
 [data-testid="stSidebar"] .stMarkdown p,
 [data-testid="stSidebar"] .stMarkdown li {
-    color: #C9D1D9 !important; font-size: 15px !important; line-height: 1.75 !important;
-}
-[data-testid="stSidebar"] label,
-[data-testid="stSidebar"] .stCaption p {
-    color: #8B949E !important; font-size: 13px !important;
+    color: #C9D1D9 !important; font-size: 14px !important; line-height: 1.7 !important;
 }
 
-/* Context card */
-.ctx-card {
-    background: #0D1B2A; border: 1px solid #1F3A5F;
-    border-radius: 12px; padding: 16px 18px;
-    font-size: 15px; line-height: 1.9; color: #D0D7DE; margin-bottom: 12px;
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+button[data-baseweb="tab"] {
+    color: #8B949E !important; font-size: 15px !important; font-weight: 600 !important;
+    background: transparent !important; padding: 10px 22px !important;
+    transition: color .15s ease !important;
 }
-.ctx-card b { color: #58A6FF; font-weight: 600; }
+button[data-baseweb="tab"]:hover { color: #C9D1D9 !important; }
+button[data-baseweb="tab"][aria-selected="true"] { color: #58A6FF !important; }
 
-/* Chat messages */
+/* ── All form inputs (global fix for dark theme) ──────────────────────────── */
+input, textarea {
+    background-color: #161B22 !important; color: #E6EDF3 !important;
+    border: 1px solid #30363D !important; border-radius: 8px !important;
+    font-size: 14px !important;
+}
+input::placeholder, textarea::placeholder { color: #6E7681 !important; }
+select {
+    background-color: #161B22 !important; color: #E6EDF3 !important;
+    border: 1px solid #30363D !important;
+}
+
+/* ── Labels ───────────────────────────────────────────────────────────────── */
+label { color: #8B949E !important; font-size: 13px !important; }
+[data-testid="stSidebar"] label { color: #8B949E !important; font-size: 13px !important; }
+
+/* ── Selectbox dropdown ───────────────────────────────────────────────────── */
+[data-testid="stSelectbox"] div[data-baseweb="select"] > div:first-child {
+    background: #161B22 !important; border-color: #30363D !important;
+}
+[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+    color: #E6EDF3 !important; font-size: 14px !important;
+}
+li[role="option"] {
+    background: #161B22 !important; color: #C9D1D9 !important; font-size: 14px !important;
+}
+li[role="option"]:hover, li[role="option"][aria-selected="true"] {
+    background: #21262D !important; color: #E6EDF3 !important;
+}
+
+/* ── Expanders ────────────────────────────────────────────────────────────── */
+details summary {
+    color: #C9D1D9 !important; font-size: 14px !important; font-weight: 500 !important;
+}
+details summary:hover { color: #E6EDF3 !important; }
+details[open] summary { color: #58A6FF !important; }
+details > div { background: #0D1117 !important; }
+details > div p, details > div li { color: #C9D1D9 !important; font-size: 14px !important; }
+
+/* ── Number input ─────────────────────────────────────────────────────────── */
+[data-testid="stNumberInput"] button {
+    background: #21262D !important; color: #E6EDF3 !important;
+    border-color: #30363D !important;
+}
+
+/* ── Toggle ───────────────────────────────────────────────────────────────── */
+[data-testid="stToggle"] p, [data-testid="stToggle"] label,
+[data-testid="stToggle"] span { color: #C9D1D9 !important; font-size: 14px !important; }
+
+/* ── File uploader ────────────────────────────────────────────────────────── */
+[data-testid="stFileUploader"] label {
+    color: #C9D1D9 !important; font-size: 14px !important; font-weight: 500 !important;
+}
+[data-testid="stFileUploader"] section {
+    background: #161B22 !important; border: 1.5px dashed #30363D !important;
+    border-radius: 10px !important;
+}
+[data-testid="stFileUploader"] section p,
+[data-testid="stFileUploader"] section span { color: #8B949E !important; font-size: 13px !important; }
+[data-testid="stFileUploader"] section button {
+    background: #21262D !important; color: #C9D1D9 !important;
+    border: 1px solid #30363D !important; font-size: 13px !important;
+}
+
+/* ── Alert / Info / Warning / Success / Error boxes ──────────────────────── */
+[data-testid="stAlert"] {
+    border-radius: 8px !important; padding: 12px 16px !important;
+}
+[data-testid="stAlert"] p, [data-testid="stAlert"] li,
+[data-testid="stAlert"] strong {
+    color: #C9D1D9 !important; font-size: 14px !important; line-height: 1.6 !important;
+}
+
+/* ── Caption ──────────────────────────────────────────────────────────────── */
+[data-testid="stCaptionContainer"] p,
+.stCaption p { color: #6E7681 !important; font-size: 13px !important; }
+
+/* ── Main content text (outside chat) ────────────────────────────────────── */
+.stMarkdown p  { color: #C9D1D9; font-size: 15px; line-height: 1.75; }
+.stMarkdown li { color: #C9D1D9; font-size: 15px; line-height: 1.75; }
+.stMarkdown strong, .stMarkdown b { color: #E6EDF3; font-weight: 600; }
+.stMarkdown h1 { color: #E6EDF3; font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.stMarkdown h2 { color: #E6EDF3; font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.stMarkdown h3 { color: #58A6FF; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.stMarkdown h4 { color: #C9D1D9; font-size: 15px; font-weight: 600; }
+.stMarkdown code {
+    background: #161B22; color: #79C0FF;
+    padding: 2px 6px; border-radius: 4px; font-size: 13px;
+}
+.stMarkdown a { color: #58A6FF; text-decoration: underline; }
+
+/* ── Chat messages ────────────────────────────────────────────────────────── */
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li,
 [data-testid="stChatMessage"] h1,
@@ -94,52 +187,93 @@ st.markdown("""
     background: #161B22 !important; color: #79C0FF !important;
     padding: 2px 7px !important; border-radius: 5px !important; font-size: 14px !important;
 }
-[data-testid="stChatMessage"] a { color: #58A6FF !important; text-decoration: underline; }
+[data-testid="stChatMessage"] a { color: #58A6FF !important; }
+[data-testid="stChatMessage"] table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+[data-testid="stChatMessage"] th {
+    background: #161B22 !important; color: #58A6FF !important;
+    padding: 8px 12px; font-size: 14px; text-align: left;
+    border-bottom: 1px solid #30363D;
+}
+[data-testid="stChatMessage"] td {
+    color: #C9D1D9 !important; padding: 8px 12px; font-size: 14px;
+    border-bottom: 1px solid #21262D;
+}
 
-/* Severity badges */
+/* ── Chat input ───────────────────────────────────────────────────────────── */
+[data-testid="stChatInput"] textarea {
+    font-size: 15px !important; color: #E6EDF3 !important;
+    background: #161B22 !important; border: 1px solid #30363D !important;
+    border-radius: 12px !important;
+}
+[data-testid="stChatInput"] textarea::placeholder { color: #6E7681 !important; }
+
+/* ── Severity badges ──────────────────────────────────────────────────────── */
 .badge {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 5px 18px; border-radius: 50px;
     font-size: 12px; font-weight: 700; letter-spacing: 1px;
     text-transform: uppercase; margin-bottom: 14px;
 }
-.badge-EMERGENCY { background:rgba(255,75,75,.12);  color:#FF6B6B; border:1.5px solid #FF6B6B; }
-.badge-SEVERE    { background:rgba(255,140,0,.12);  color:#FFA040; border:1.5px solid #FFA040; }
-.badge-MODERATE  { background:rgba(210,160,0,.12);  color:#E5B000; border:1.5px solid #E5B000; }
-.badge-MILD      { background:rgba(63,185,80,.12);  color:#3FB950; border:1.5px solid #3FB950; }
+.badge-EMERGENCY { background: rgba(255,75,75,.12);  color: #FF6B6B; border: 1.5px solid #FF6B6B; }
+.badge-SEVERE    { background: rgba(255,140,0,.12);  color: #FFA040; border: 1.5px solid #FFA040; }
+.badge-MODERATE  { background: rgba(210,160,0,.12);  color: #E5B000; border: 1.5px solid #E5B000; }
+.badge-MILD      { background: rgba(63,185,80,.12);  color: #3FB950; border: 1.5px solid #3FB950; }
 
-/* Buttons */
+/* ── History pills ────────────────────────────────────────────────────────── */
+.hist-pill { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; letter-spacing: .5px; }
+.hist-EMERGENCY { background: #FF4B4B22; color: #FF6B6B; border: 1px solid #FF6B6B; }
+.hist-SEVERE    { background: #FF8C0022; color: #FFA040; border: 1px solid #FFA040; }
+.hist-MODERATE  { background: #D4A01722; color: #E5B000; border: 1px solid #E5B000; }
+.hist-MILD      { background: #3FB95022; color: #3FB950; border: 1px solid #3FB950; }
+
+/* ── Context card ─────────────────────────────────────────────────────────── */
+.ctx-card {
+    background: #0D1B2A; border: 1px solid #1F3A5F;
+    border-radius: 12px; padding: 14px 16px;
+    font-size: 14px; line-height: 1.85; color: #C9D1D9; margin-bottom: 10px;
+}
+.ctx-card b { color: #58A6FF; font-weight: 600; }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
 div.stButton > button {
-    background: linear-gradient(135deg,#1f6feb,#388bfd);
-    color:#fff !important; border:none !important; border-radius:10px;
-    font-size:14px; font-weight:600; padding:8px 16px;
-    transition:all .2s ease; box-shadow:0 2px 8px rgba(31,111,235,.3);
+    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    color: #fff !important; border: none !important; border-radius: 10px;
+    font-size: 14px; font-weight: 600; padding: 8px 16px;
+    transition: all .2s ease; box-shadow: 0 2px 8px rgba(31,111,235,.3);
 }
 div.stButton > button:hover {
-    background: linear-gradient(135deg,#388bfd,#58a6ff) !important;
-    box-shadow:0 4px 16px rgba(88,166,255,.35) !important; transform:translateY(-1px);
+    background: linear-gradient(135deg, #388bfd, #58a6ff) !important;
+    box-shadow: 0 4px 16px rgba(88,166,255,.35) !important;
+    transform: translateY(-1px);
+}
+[data-testid="stDownloadButton"] button {
+    background: linear-gradient(135deg, #1a7f37, #2ea043) !important;
+    color: #fff !important;
+}
+[data-testid="stDownloadButton"] button:hover {
+    background: linear-gradient(135deg, #2ea043, #3fb950) !important;
 }
 
-/* Chat input */
-[data-testid="stChatInput"] textarea {
-    font-size:15px !important; color:#E6EDF3 !important;
-    background:#161B22 !important; border:1px solid #30363D !important; border-radius:12px !important;
-}
-[data-testid="stChatInput"] textarea::placeholder { color:#6E7681 !important; }
+/* ── Audio player ─────────────────────────────────────────────────────────── */
+audio { width: 100%; border-radius: 8px; margin-top: 6px; }
 
-/* History severity pills */
-.hist-pill {
-    display:inline-block; padding:2px 10px; border-radius:50px;
-    font-size:11px; font-weight:700; letter-spacing:.5px;
-}
-.hist-EMERGENCY { background:#FF4B4B22; color:#FF6B6B; border:1px solid #FF6B6B; }
-.hist-SEVERE    { background:#FF8C0022; color:#FFA040; border:1px solid #FFA040; }
-.hist-MODERATE  { background:#D4A01722; color:#E5B000; border:1px solid #E5B000; }
-.hist-MILD      { background:#3FB95022; color:#3FB950; border:1px solid #3FB950; }
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
+[data-testid="stSpinner"] p { color: #8B949E !important; font-size: 14px !important; }
 
-[data-testid="stAlert"] p { font-size:14px !important; }
-hr { border-color:#21262D !important; opacity:1 !important; }
-section.main > div { padding-bottom:100px; }
+/* ── Eval score bars ──────────────────────────────────────────────────────── */
+.score-bar-wrap { background:#21262D; border-radius:6px; height:10px; margin:4px 0 10px; }
+.score-bar { height:10px; border-radius:6px; }
+.score-rag  { background: linear-gradient(90deg, #1f6feb, #58a6ff); }
+.score-llm  { background: linear-gradient(90deg, #6e40c9, #a371f7); }
+.eval-card {
+    background: #161B22; border: 1px solid #21262D; border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 14px;
+}
+.eval-q { color: #E6EDF3; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+.eval-label { color: #8B949E; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.eval-score { font-size: 22px; font-weight: 800; }
+.eval-rag-score  { color: #58A6FF; }
+.eval-llm-score  { color: #A371F7; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -416,7 +550,7 @@ st.markdown(
 # ─────────────────────────────────────────────────────────────────────────────
 # TABS
 # ─────────────────────────────────────────────────────────────────────────────
-_tab_chat, _tab_report = st.tabs(["💬 Consultation", "🔬 Analyze Medical Report"])
+_tab_chat, _tab_report, _tab_eval = st.tabs(["💬 Consultation", "🔬 Analyze Medical Report", "📊 Evaluation"])
 
 # ══════════════════════════ REPORT ANALYSIS TAB ═══════════════════════════════
 with _tab_report:
@@ -516,6 +650,153 @@ with _tab_report:
                 if _tmp_report and os.path.exists(_tmp_report):
                     try: os.unlink(_tmp_report)
                     except OSError: pass
+
+# ══════════════════════════ EVALUATION TAB ════════════════════════════════════
+with _tab_eval:
+    st.markdown(
+        "<h3 style='color:#E6EDF3;font-size:22px;font-weight:700;margin-bottom:4px'>"
+        "RAG vs Plain LLM — Ablation Study</h3>"
+        "<p style='color:#8B949E;font-size:15px;margin-bottom:20px'>"
+        "Compares responses from the full RAG pipeline (Pinecone + 3 knowledge sources) "
+        "against a plain LLM with no medical knowledge base. "
+        "Scored 1–5 by an independent LLM judge on accuracy, specificity, and grounding.</p>",
+        unsafe_allow_html=True,
+    )
+
+    _eval_file = os.path.join("data", "eval_results.json")
+
+    if not os.path.exists(_eval_file):
+        st.info(
+            "Evaluation results not generated yet.\n\n"
+            "Run this command once from your project folder:\n\n"
+            "```\npython eval.py\n```\n\n"
+            "It tests 20 medical questions, compares RAG vs plain LLM, "
+            "and saves results here automatically."
+        )
+    else:
+        import json as _json
+        with open(_eval_file, encoding="utf-8") as _ef:
+            _edata = _json.load(_ef)
+
+        _summary = _edata.get("summary", {})
+        _results = _edata.get("results", [])
+
+        # ── Summary banner ────────────────────────────────────────────────────
+        _c1, _c2, _c3 = st.columns(3)
+        _avg_rag = _summary.get("avg_rag_score", 0)
+        _avg_llm = _summary.get("avg_llm_score", 0)
+        _improvement = _summary.get("improvement_pct", 0)
+
+        with _c1:
+            st.markdown(
+                f"<div style='background:#0D1B2A;border:1px solid #1F3A5F;border-radius:12px;padding:18px;text-align:center'>"
+                f"<div style='color:#8B949E;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px'>RAG Pipeline</div>"
+                f"<div style='color:#58A6FF;font-size:36px;font-weight:800;margin:6px 0'>{_avg_rag:.1f}<span style='font-size:18px'>/5</span></div>"
+                f"<div style='color:#8B949E;font-size:13px'>Average Score</div>"
+                f"</div>", unsafe_allow_html=True)
+        with _c2:
+            st.markdown(
+                f"<div style='background:#0D1B2A;border:1px solid #2D1B5F;border-radius:12px;padding:18px;text-align:center'>"
+                f"<div style='color:#8B949E;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px'>Plain LLM</div>"
+                f"<div style='color:#A371F7;font-size:36px;font-weight:800;margin:6px 0'>{_avg_llm:.1f}<span style='font-size:18px'>/5</span></div>"
+                f"<div style='color:#8B949E;font-size:13px'>Average Score</div>"
+                f"</div>", unsafe_allow_html=True)
+        with _c3:
+            _imp_val   = abs(_improvement)
+            _imp_sign  = "+" if _improvement >= 0 else "-"
+            _imp_color = "#3FB950" if _improvement >= 0 else "#FFA040"
+            _imp_label = "RAG over Plain LLM" if _improvement >= 0 else "LLM slightly ahead"
+            st.markdown(
+                f"<div style='background:#0D1B2A;border:1px solid #1B3A1F;border-radius:12px;padding:18px;text-align:center'>"
+                f"<div style='color:#8B949E;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px'>Score Difference</div>"
+                f"<div style='color:{_imp_color};font-size:36px;font-weight:800;margin:6px 0'>{_imp_sign}{_imp_val:.0f}<span style='font-size:18px'>%</span></div>"
+                f"<div style='color:#8B949E;font-size:13px'>{_imp_label}</div>"
+                f"</div>", unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── Knowledge sources used ────────────────────────────────────────────
+        _sources_used = _summary.get("knowledge_sources", [])
+        if _sources_used:
+            st.markdown(
+                "<p style='color:#8B949E;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px'>Knowledge Sources</p>",
+                unsafe_allow_html=True,
+            )
+            _src_html = " &nbsp;·&nbsp; ".join(
+                f"<span style='color:#C9D1D9;background:#161B22;border:1px solid #30363D;"
+                f"border-radius:6px;padding:3px 10px;font-size:13px'>{s}</span>"
+                for s in _sources_used
+            )
+            st.markdown(_src_html, unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── Per-question breakdown ────────────────────────────────────────────
+        st.markdown(
+            "<p style='color:#E6EDF3;font-size:16px;font-weight:600;margin-bottom:12px'>Question-by-Question Breakdown</p>",
+            unsafe_allow_html=True,
+        )
+
+        _categories = {}
+        for _r in _results:
+            _cat = _r.get("category", "General")
+            _categories.setdefault(_cat, []).append(_r)
+
+        for _cat, _items in _categories.items():
+            st.markdown(
+                f"<p style='color:#58A6FF;font-size:13px;font-weight:700;"
+                f"text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px'>{_cat}</p>",
+                unsafe_allow_html=True,
+            )
+            for _r in _items:
+                _rs  = _r.get("rag_score", 0)
+                _ls  = _r.get("llm_score", 0)
+                _srcs = ", ".join(_r.get("sources", [])) or "—"
+                _winner = "RAG" if _rs >= _ls else "LLM"
+                _win_col = "#58A6FF" if _winner == "RAG" else "#A371F7"
+                st.markdown(
+                    f"<div class='eval-card'>"
+                    f"<div class='eval-q'>Q: {_r['question']}</div>"
+                    f"<div style='display:flex;gap:32px;align-items:flex-start'>"
+                    f"<div style='flex:1'>"
+                    f"  <div class='eval-label'>RAG Pipeline</div>"
+                    f"  <div class='eval-score eval-rag-score'>{_rs}/5</div>"
+                    f"  <div class='score-bar-wrap'><div class='score-bar score-rag' style='width:{_rs/5*100:.0f}%'></div></div>"
+                    f"  <div style='color:#8B949E;font-size:12px'>Sources: {_srcs}</div>"
+                    f"</div>"
+                    f"<div style='flex:1'>"
+                    f"  <div class='eval-label'>Plain LLM</div>"
+                    f"  <div class='eval-score eval-llm-score'>{_ls}/5</div>"
+                    f"  <div class='score-bar-wrap'><div class='score-bar score-llm' style='width:{_ls/5*100:.0f}%'></div></div>"
+                    f"  <div style='color:#8B949E;font-size:12px'>{_r.get('llm_note','No knowledge base')}</div>"
+                    f"</div>"
+                    f"<div style='text-align:center;min-width:80px'>"
+                    f"  <div class='eval-label'>Winner</div>"
+                    f"  <div style='color:{_win_col};font-size:18px;font-weight:800;margin-top:4px'>{_winner}</div>"
+                    f"</div>"
+                    f"</div>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+        # ── Methodology note ──────────────────────────────────────────────────
+        with st.expander("Methodology", expanded=False):
+            st.markdown("""
+**Evaluation approach:** LLM-as-judge (Groq LLaMA 3.1-8B-Instant)
+
+Each response is scored 1–5 on three dimensions:
+- **Accuracy** — Is the medical information correct?
+- **Specificity** — Does it give concrete, actionable details (dosages, drug names, timelines)?
+- **Grounding** — Is the answer supported by a cited source, or is it generic?
+
+Final score = average of the three dimensions.
+
+**RAG pipeline knowledge base:**
+- Gale Encyclopedia of Medicine (11,718 chunks)
+- WHO Essential Medicines List 2023 (205 chunks)
+- WHO Model Formulary (1,848 chunks)
+
+**Plain LLM baseline:** Same Groq LLaMA 3.1-8B-Instant model with no retrieval context.
+            """)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # HELPERS (defined before tabs so both tabs can use them)
