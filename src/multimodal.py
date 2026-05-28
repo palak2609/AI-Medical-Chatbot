@@ -1,4 +1,3 @@
-import os
 from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
@@ -69,6 +68,7 @@ def process(
 
     # 5. Generate response
     hospitals = None
+    sources   = []
     num = _emergency_number(country)
 
     if is_emergency:
@@ -108,7 +108,9 @@ def process(
             f"Conversation so far:\n{history_text}\n"
             f"Patient query: {query}"
         ).strip()
-        response = ask_rag(rag_query)
+        rag_result = ask_rag(rag_query)
+        response   = rag_result["response"]
+        sources    = rag_result["sources"]
 
     return {
         "query":        query,
@@ -116,4 +118,5 @@ def process(
         "severity":     severity,
         "is_emergency": is_emergency,
         "hospitals":    hospitals,
+        "sources":      sources,
     }

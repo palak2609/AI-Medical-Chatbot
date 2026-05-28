@@ -608,6 +608,19 @@ def run_analysis(prompt_text: str):
             st.markdown(f'<span class="badge {_cls}">{_icon} {_sev}</span>', unsafe_allow_html=True)
             st.markdown(_response_display)
 
+            # Source citations
+            _sources = _result.get("sources", [])
+            if _sources:
+                st.markdown(
+                    "<div style='margin-top:8px;padding:8px 12px;"
+                    "background:#0D1B2A;border-left:3px solid #1F3A5F;"
+                    "border-radius:6px;font-size:13px;color:#8B949E'>"
+                    "📚 <b style='color:#58A6FF'>Sources:</b> "
+                    + " · ".join(f"<span>{s}</span>" for s in _sources)
+                    + "</div>",
+                    unsafe_allow_html=True,
+                )
+
             # Voice output — only if toggle is on
             _audio_bytes = None
             if st.session_state.voice_output:
@@ -629,6 +642,7 @@ def run_analysis(prompt_text: str):
             "severity":       _result["severity"],
             "audio_bytes":    _audio_bytes,
             "first_aid_html": _fa_rendered,
+            "sources":        _result.get("sources", []),
         })
         # Upsert — same session_id updates the same history entry
         save_session(
@@ -685,6 +699,16 @@ with _tab_chat:
                         unsafe_allow_html=True,
                     )
             st.markdown(_msg["content"])
+            if _msg.get("sources"):
+                st.markdown(
+                    "<div style='margin-top:8px;padding:8px 12px;"
+                    "background:#0D1B2A;border-left:3px solid #1F3A5F;"
+                    "border-radius:6px;font-size:13px;color:#8B949E'>"
+                    "📚 <b style='color:#58A6FF'>Sources:</b> "
+                    + " · ".join(f"<span>{s}</span>" for s in _msg["sources"])
+                    + "</div>",
+                    unsafe_allow_html=True,
+                )
             if _msg.get("audio_bytes"):
                 st.audio(_msg["audio_bytes"], format="audio/mp3")
 
