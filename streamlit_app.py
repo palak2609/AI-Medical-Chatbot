@@ -44,39 +44,80 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ── Base ─────────────────────────────────────────────────────────────────── */
-.stApp {
-    background-color: #0D1117;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+/* ══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════════════════════════════ */
+@keyframes pulse-emergency {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,75,75,.0),  0 0 12px rgba(255,75,75,.3); }
+    50%      { box-shadow: 0 0 0 6px rgba(255,75,75,.0), 0 0 28px rgba(255,75,75,.7); }
 }
-section.main > div { padding-bottom: 110px; }
-hr { border-color: #21262D !important; opacity: 1 !important; }
+@keyframes pulse-severe {
+    0%,100% { box-shadow: 0 0 8px rgba(255,140,0,.2); }
+    50%      { box-shadow: 0 0 20px rgba(255,140,0,.55); }
+}
+@keyframes fadeInUp {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+@keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+}
+@keyframes spin-ring {
+    to { transform: rotate(360deg); }
+}
 
-/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════════════════════════════ */
+.stApp {
+    background: radial-gradient(ellipse 80% 60% at 10% 0%, #0D1B2A 0%, #0D1117 55%, #060B10 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+}
+section.main > div { padding-bottom: 120px; }
+hr { border-color: #1C2128 !important; opacity: 1 !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════════════════════════════ */
 [data-testid="stSidebar"] {
-    background-color: #010409 !important;
-    border-right: 1px solid #21262D;
+    background: linear-gradient(180deg, #010409 0%, #040B12 100%) !important;
+    border-right: 1px solid #1C2128 !important;
 }
 [data-testid="stSidebar"] .stMarkdown h2 {
-    color: #E6EDF3 !important; font-size: 18px !important; font-weight: 700 !important;
+    color: #E6EDF3 !important; font-size: 17px !important; font-weight: 700 !important;
+    letter-spacing: -.2px;
 }
 [data-testid="stSidebar"] .stMarkdown h3 {
-    color: #58A6FF !important; font-size: 11px !important; font-weight: 700 !important;
-    text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px !important;
+    color: #39D0FF !important; font-size: 10px !important; font-weight: 700 !important;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px !important;
 }
 [data-testid="stSidebar"] .stMarkdown p,
 [data-testid="stSidebar"] .stMarkdown li {
-    color: #C9D1D9 !important; font-size: 14px !important; line-height: 1.7 !important;
+    color: #B0BAC8 !important; font-size: 13.5px !important; line-height: 1.7 !important;
 }
 
-/* ── Tabs ─────────────────────────────────────────────────────────────────── */
-button[data-baseweb="tab"] {
-    color: #8B949E !important; font-size: 15px !important; font-weight: 600 !important;
-    background: transparent !important; padding: 10px 22px !important;
-    transition: color .15s ease !important;
+/* ══════════════════════════════════════════════════════════════════════════
+   TABS  — pill style
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stTabs"] > div:first-child {
+    gap: 6px !important; border-bottom: 1px solid #1C2128 !important; padding-bottom: 4px;
 }
-button[data-baseweb="tab"]:hover { color: #C9D1D9 !important; }
-button[data-baseweb="tab"][aria-selected="true"] { color: #58A6FF !important; }
+button[data-baseweb="tab"] {
+    color: #6E7681 !important; font-size: 14px !important; font-weight: 600 !important;
+    background: transparent !important; padding: 8px 20px !important;
+    border-radius: 8px !important; transition: all .18s ease !important;
+    border: 1px solid transparent !important;
+}
+button[data-baseweb="tab"]:hover {
+    color: #C9D1D9 !important; background: #161B22 !important;
+    border-color: #30363D !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #39D0FF !important; background: rgba(57,208,255,.08) !important;
+    border-color: rgba(57,208,255,.3) !important;
+}
 
 /* ── All form inputs (global fix for dark theme) ──────────────────────────── */
 input, textarea {
@@ -169,7 +210,24 @@ details > div p, details > div li { color: #C9D1D9 !important; font-size: 14px !
 }
 .stMarkdown a { color: #58A6FF; text-decoration: underline; }
 
-/* ── Chat messages ────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   CHAT MESSAGES  — glassmorphism cards
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stChatMessage"] {
+    background: rgba(22,27,34,.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid #21262D !important;
+    border-radius: 16px !important;
+    padding: 18px 22px !important;
+    margin: 6px 0 !important;
+    animation: fadeInUp .25s ease forwards;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+[data-testid="stChatMessage"]:hover {
+    border-color: #30363D !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,.4) !important;
+}
 [data-testid="stChatMessage"] p,
 [data-testid="stChatMessage"] li,
 [data-testid="stChatMessage"] h1,
@@ -179,45 +237,70 @@ details > div p, details > div li { color: #C9D1D9 !important; font-size: 14px !
 [data-testid="stChatMessage"] strong,
 [data-testid="stChatMessage"] em,
 [data-testid="stChatMessage"] a {
-    color: #E6EDF3 !important; font-size: 16px !important; line-height: 1.85 !important;
+    color: #E6EDF3 !important; font-size: 15.5px !important; line-height: 1.85 !important;
 }
-[data-testid="stChatMessage"] h2 { font-size: 20px !important; font-weight: 700 !important; }
-[data-testid="stChatMessage"] h3 { font-size: 17px !important; font-weight: 600 !important; }
+[data-testid="stChatMessage"] h2 { font-size: 19px !important; font-weight: 700 !important; color: #E6EDF3 !important; }
+[data-testid="stChatMessage"] h3 { font-size: 16px !important; font-weight: 600 !important; color: #39D0FF !important; }
 [data-testid="stChatMessage"] code {
-    background: #161B22 !important; color: #79C0FF !important;
-    padding: 2px 7px !important; border-radius: 5px !important; font-size: 14px !important;
+    background: #0D1117 !important; color: #79C0FF !important;
+    padding: 2px 7px !important; border-radius: 5px !important; font-size: 13.5px !important;
+    border: 1px solid #21262D !important;
 }
-[data-testid="stChatMessage"] a { color: #58A6FF !important; }
-[data-testid="stChatMessage"] table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+[data-testid="stChatMessage"] a { color: #39D0FF !important; }
+[data-testid="stChatMessage"] table { width: 100%; border-collapse: collapse; margin: 10px 0; border-radius: 10px; overflow: hidden; }
 [data-testid="stChatMessage"] th {
-    background: #161B22 !important; color: #58A6FF !important;
-    padding: 8px 12px; font-size: 14px; text-align: left;
-    border-bottom: 1px solid #30363D;
+    background: #0D1B2A !important; color: #39D0FF !important;
+    padding: 10px 14px; font-size: 13px; text-align: left; font-weight: 700;
+    border-bottom: 1px solid #1F3A5F;
 }
 [data-testid="stChatMessage"] td {
-    color: #C9D1D9 !important; padding: 8px 12px; font-size: 14px;
-    border-bottom: 1px solid #21262D;
+    color: #C9D1D9 !important; padding: 9px 14px; font-size: 14px;
+    border-bottom: 1px solid #1C2128;
 }
+[data-testid="stChatMessage"] tr:last-child td { border-bottom: none !important; }
 
-/* ── Chat input ───────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   CHAT INPUT  — neon focus ring
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stChatInput"] {
+    background: rgba(22,27,34,.9) !important;
+    border: 1.5px solid #30363D !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(8px) !important;
+    padding: 4px 8px !important;
+    transition: border-color .2s ease, box-shadow .2s ease !important;
+}
+[data-testid="stChatInput"]:focus-within {
+    border-color: rgba(57,208,255,.5) !important;
+    box-shadow: 0 0 0 3px rgba(57,208,255,.1), 0 0 20px rgba(57,208,255,.08) !important;
+}
 [data-testid="stChatInput"] textarea {
     font-size: 15px !important; color: #E6EDF3 !important;
-    background: #161B22 !important; border: 1px solid #30363D !important;
-    border-radius: 12px !important;
+    background: transparent !important; border: none !important;
+    border-radius: 0 !important;
 }
-[data-testid="stChatInput"] textarea::placeholder { color: #6E7681 !important; }
+[data-testid="stChatInput"] textarea::placeholder { color: #484F58 !important; font-size: 14.5px !important; }
 
-/* ── Severity badges ──────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   SEVERITY BADGES  — neon glow
+══════════════════════════════════════════════════════════════════════════ */
 .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 18px; border-radius: 50px;
-    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 20px; border-radius: 50px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px;
     text-transform: uppercase; margin-bottom: 14px;
+    transition: box-shadow .3s ease;
 }
-.badge-EMERGENCY { background: rgba(255,75,75,.12);  color: #FF6B6B; border: 1.5px solid #FF6B6B; }
-.badge-SEVERE    { background: rgba(255,140,0,.12);  color: #FFA040; border: 1.5px solid #FFA040; }
-.badge-MODERATE  { background: rgba(210,160,0,.12);  color: #E5B000; border: 1.5px solid #E5B000; }
-.badge-MILD      { background: rgba(63,185,80,.12);  color: #3FB950; border: 1.5px solid #3FB950; }
+.badge-EMERGENCY {
+    background: rgba(255,75,75,.15); color: #FF6B6B; border: 1.5px solid #FF6B6B;
+    animation: pulse-emergency 2s ease-in-out infinite;
+}
+.badge-SEVERE {
+    background: rgba(255,140,0,.12); color: #FFA040; border: 1.5px solid #FFA040;
+    animation: pulse-severe 2.5s ease-in-out infinite;
+}
+.badge-MODERATE { background: rgba(210,160,0,.10); color: #E5B000; border: 1.5px solid #E5B000; box-shadow: 0 0 8px rgba(229,176,0,.2); }
+.badge-MILD     { background: rgba(63,185,80,.10);  color: #3FB950; border: 1.5px solid #3FB950; box-shadow: 0 0 8px rgba(63,185,80,.15); }
 
 /* ── History pills ────────────────────────────────────────────────────────── */
 .hist-pill { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; letter-spacing: .5px; }
@@ -226,39 +309,57 @@ details > div p, details > div li { color: #C9D1D9 !important; font-size: 14px !
 .hist-MODERATE  { background: #D4A01722; color: #E5B000; border: 1px solid #E5B000; }
 .hist-MILD      { background: #3FB95022; color: #3FB950; border: 1px solid #3FB950; }
 
-/* ── Context card ─────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTEXT CARD  — glassmorphism
+══════════════════════════════════════════════════════════════════════════ */
 .ctx-card {
-    background: #0D1B2A; border: 1px solid #1F3A5F;
-    border-radius: 12px; padding: 14px 16px;
-    font-size: 14px; line-height: 1.85; color: #C9D1D9; margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(13,27,42,.9), rgba(9,18,30,.9));
+    border: 1px solid #1F3A5F; border-radius: 14px;
+    padding: 14px 16px; font-size: 13.5px; line-height: 1.9;
+    color: #B0BAC8; margin-bottom: 10px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.3), inset 0 1px 0 rgba(57,208,255,.06);
 }
-.ctx-card b { color: #58A6FF; font-weight: 600; }
+.ctx-card b { color: #39D0FF; font-weight: 600; }
 
-/* ── Buttons ──────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════════════════════════════════ */
 div.stButton > button {
-    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    background: linear-gradient(135deg, #1461c7, #2d80fc);
     color: #fff !important; border: none !important; border-radius: 10px;
-    font-size: 14px; font-weight: 600; padding: 8px 16px;
-    transition: all .2s ease; box-shadow: 0 2px 8px rgba(31,111,235,.3);
+    font-size: 13.5px; font-weight: 600; padding: 8px 16px;
+    transition: all .2s ease;
+    box-shadow: 0 2px 12px rgba(45,128,252,.3), inset 0 1px 0 rgba(255,255,255,.1);
 }
 div.stButton > button:hover {
-    background: linear-gradient(135deg, #388bfd, #58a6ff) !important;
-    box-shadow: 0 4px 16px rgba(88,166,255,.35) !important;
+    background: linear-gradient(135deg, #2d80fc, #39D0FF) !important;
+    box-shadow: 0 4px 20px rgba(57,208,255,.35) !important;
     transform: translateY(-1px);
 }
+div.stButton > button:active { transform: translateY(0) !important; }
+
 [data-testid="stDownloadButton"] button {
-    background: linear-gradient(135deg, #1a7f37, #2ea043) !important;
+    background: linear-gradient(135deg, #14532d, #16a34a) !important;
     color: #fff !important;
+    box-shadow: 0 2px 12px rgba(22,163,74,.25) !important;
 }
 [data-testid="stDownloadButton"] button:hover {
-    background: linear-gradient(135deg, #2ea043, #3fb950) !important;
+    background: linear-gradient(135deg, #16a34a, #22c55e) !important;
+    box-shadow: 0 4px 20px rgba(34,197,94,.35) !important;
 }
 
-/* ── Audio player ─────────────────────────────────────────────────────────── */
-audio { width: 100%; border-radius: 8px; margin-top: 6px; }
+/* ══════════════════════════════════════════════════════════════════════════
+   AUDIO PLAYER
+══════════════════════════════════════════════════════════════════════════ */
+audio {
+    width: 100%; border-radius: 10px; margin-top: 8px;
+    background: #161B22; border: 1px solid #21262D;
+}
 
-/* ── Spinner ──────────────────────────────────────────────────────────────── */
-[data-testid="stSpinner"] p { color: #8B949E !important; font-size: 14px !important; }
+/* ══════════════════════════════════════════════════════════════════════════
+   SPINNER / LOADING
+══════════════════════════════════════════════════════════════════════════ */
+[data-testid="stSpinner"] p { color: #6E7681 !important; font-size: 13.5px !important; }
 
 /* ── Eval score bars ──────────────────────────────────────────────────────── */
 .score-bar-wrap { background:#21262D; border-radius:6px; height:10px; margin:4px 0 10px; }
@@ -302,8 +403,16 @@ for k, v in _defaults.items():
 # SIDEBAR
 # ─────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🏥 AI Medical Assistant")
-    st.caption("Voice · Vision · RAG · Context-Aware")
+    st.markdown(
+        "<div style='padding:4px 0 12px'>"
+        "<div style='font-size:19px;font-weight:800;color:#E6EDF3;letter-spacing:-.3px'>🏥 MediAssist AI</div>"
+        "<div style='display:flex;align-items:center;gap:6px;margin-top:5px'>"
+        "<span style='width:7px;height:7px;border-radius:50%;background:#3FB950;"
+        "box-shadow:0 0 6px #3FB950;display:inline-block'></span>"
+        "<span style='font-size:12px;color:#6E7681;font-weight:500'>System Online</span>"
+        "</div></div>",
+        unsafe_allow_html=True,
+    )
     st.divider()
 
     # ── Environmental context ─────────────────────────────────────────────────
@@ -537,13 +646,18 @@ with st.sidebar:
 # HEADER
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown(
-    "<h1 style='text-align:center;color:#4DA6FF;margin-bottom:2px;font-size:44px;font-weight:800'>"
-    "🏥 AI Medical Assistant</h1>",
-    unsafe_allow_html=True,
-)
-st.markdown(
-    "<p style='text-align:center;color:#8B949E;margin-bottom:24px;font-size:16px'>"
-    "Multimodal · Context-Aware · Emergency-Ready · Multilingual</p>",
+    "<div style='text-align:center;padding:28px 0 18px'>"
+    "<div style='display:inline-block;background:linear-gradient(135deg,rgba(57,208,255,.12),rgba(31,111,235,.08));"
+    "border:1px solid rgba(57,208,255,.2);border-radius:20px;padding:6px 20px;margin-bottom:16px;"
+    "font-size:12px;font-weight:700;color:#39D0FF;letter-spacing:2px;text-transform:uppercase'>"
+    "AI-Powered Healthcare Platform</div>"
+    "<h1 style='background:linear-gradient(135deg,#E6EDF3 0%,#39D0FF 50%,#58A6FF 100%);"
+    "-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"
+    "font-size:46px;font-weight:800;margin:0 0 10px;letter-spacing:-1px;line-height:1.1'>"
+    "🏥 AI Medical Assistant</h1>"
+    "<p style='color:#6E7681;font-size:15px;margin:0;font-weight:400;letter-spacing:.3px'>"
+    "Multimodal &nbsp;·&nbsp; Context-Aware &nbsp;·&nbsp; Emergency-Ready &nbsp;·&nbsp; Multilingual</p>"
+    "</div>",
     unsafe_allow_html=True,
 )
 
@@ -886,19 +1000,36 @@ def run_analysis(prompt_text: str):
 
             _sev = _result["severity"]
             _icon, _cls = _SEV_STYLE.get(_sev, ("✅", "badge-MILD"))
+
+            # Emergency glow wrapper
+            if _sev == "EMERGENCY":
+                st.markdown(
+                    "<div style='border:1.5px solid rgba(255,75,75,.5);border-radius:12px;"
+                    "padding:12px 14px;background:rgba(255,75,75,.04);"
+                    "box-shadow:0 0 24px rgba(255,75,75,.2),inset 0 0 24px rgba(255,75,75,.03);"
+                    "margin-bottom:10px;animation:pulse-emergency 2s infinite'>",
+                    unsafe_allow_html=True,
+                )
+
             st.markdown(f'<span class="badge {_cls}">{_icon} {_sev}</span>', unsafe_allow_html=True)
             st.markdown(_response_display)
 
-            # Source citations
+            if _sev == "EMERGENCY":
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            # Source citations — pill style
             _sources = _result.get("sources", [])
             if _sources:
+                _pills = "".join(
+                    f"<span style='background:#0D1B2A;border:1px solid #1F3A5F;"
+                    f"border-radius:20px;padding:3px 11px;font-size:12px;color:#39D0FF;"
+                    f"font-weight:500'>{s}</span>"
+                    for s in _sources
+                )
                 st.markdown(
-                    "<div style='margin-top:8px;padding:8px 12px;"
-                    "background:#0D1B2A;border-left:3px solid #1F3A5F;"
-                    "border-radius:6px;font-size:13px;color:#8B949E'>"
-                    "📚 <b style='color:#58A6FF'>Sources:</b> "
-                    + " · ".join(f"<span>{s}</span>" for s in _sources)
-                    + "</div>",
+                    f"<div style='margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap'>"
+                    f"<span style='font-size:12px;color:#484F58;font-weight:600;text-transform:uppercase;"
+                    f"letter-spacing:.8px'>Sources</span>{_pills}</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -981,13 +1112,16 @@ with _tab_chat:
                     )
             st.markdown(_msg["content"])
             if _msg.get("sources"):
+                _spills = "".join(
+                    f"<span style='background:#0D1B2A;border:1px solid #1F3A5F;"
+                    f"border-radius:20px;padding:3px 11px;font-size:12px;color:#39D0FF;"
+                    f"font-weight:500'>{s}</span>"
+                    for s in _msg["sources"]
+                )
                 st.markdown(
-                    "<div style='margin-top:8px;padding:8px 12px;"
-                    "background:#0D1B2A;border-left:3px solid #1F3A5F;"
-                    "border-radius:6px;font-size:13px;color:#8B949E'>"
-                    "📚 <b style='color:#58A6FF'>Sources:</b> "
-                    + " · ".join(f"<span>{s}</span>" for s in _msg["sources"])
-                    + "</div>",
+                    f"<div style='margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap'>"
+                    f"<span style='font-size:12px;color:#484F58;font-weight:600;text-transform:uppercase;"
+                    f"letter-spacing:.8px'>Sources</span>{_spills}</div>",
                     unsafe_allow_html=True,
                 )
             if _msg.get("audio_bytes"):
