@@ -24,8 +24,9 @@ from src.first_aid       import get_card as get_first_aid_card, all_cards, rende
 from src.history         import save_session, load_history, clear_history
 from src.pdf_report      import generate_report
 from src.translator      import LANGUAGES, to_english, from_english
-from src.report_analyzer import analyze_pdf, analyze_image_report
-from src.voice_output    import text_to_speech
+from src.report_analyzer      import analyze_pdf, analyze_image_report
+from src.prescription_analyzer import analyze_prescription
+from src.voice_output          import text_to_speech
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
@@ -661,6 +662,7 @@ with st.sidebar:
         "🆘 First Aid Quick Cards",
         "⚖️ BMI Calculator",
         "🌐 Multilingual Support",
+        "💊 Prescription Decoder",
     ]:
         st.markdown(f"- {_f}")
 
@@ -792,6 +794,96 @@ with _tab_report:
             finally:
                 if _tmp_report and os.path.exists(_tmp_report):
                     try: os.unlink(_tmp_report)
+                    except OSError: pass
+
+    # ══════════════════ PRESCRIPTION DECODER ══════════════════════════════════
+    st.markdown("---")
+    st.markdown(
+        "<div style='margin:8px 0 18px'>"
+        "<h3 style='color:#E6EDF3;font-size:20px;font-weight:700;margin:0 0 6px'>💊 Prescription Decoder</h3>"
+        "<p style='color:#8B949E;font-size:14px;margin:0'>"
+        "Upload a photo of your prescription — the AI will identify every medicine, "
+        "explain what it does, its dosage, side effects, and what to watch out for.</p>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    _rx_col1, _rx_col2 = st.columns([1, 1])
+    with _rx_col1:
+        _rx_upload = st.file_uploader(
+            "Prescription photo (handwritten or printed)",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="rx_img",
+        )
+    with _rx_col2:
+        if _rx_upload:
+            st.image(_rx_upload, caption="Uploaded prescription", use_container_width=True)
+
+    if _rx_upload:
+        if st.button("💊 Decode Prescription", type="primary", use_container_width=False):
+            _tmp_rx = None
+            try:
+                _ext_rx = _rx_upload.name.rsplit(".", 1)[-1]
+                _t = tempfile.NamedTemporaryFile(delete=False, suffix=f".{_ext_rx}")
+                _t.write(_rx_upload.read()); _t.close()
+                _tmp_rx = _t.name
+
+                with st.spinner("Reading prescription and looking up each medicine… (20–40 seconds)"):
+                    _rx_result = analyze_prescription(_tmp_rx)
+
+                if _rx_result.get("error"):
+                    st.warning(_rx_result["error"])
+                else:
+                    _meds = _rx_result["medicines"]
+                    st.markdown(
+                        f"<p style='color:#3FB950;font-size:14px;font-weight:600;margin:12px 0'>"
+                        f"Found {_rx_result['count']} medicine(s) in your prescription</p>",
+                        unsafe_allow_html=True,
+                    )
+
+                    for _i, _med in enumerate(_meds, 1):
+                        _srcs = _med.get("sources", [])
+                        _src_pills = "".join(
+                            f"<span style='background:#0D1B2A;border:1px solid #1F3A5F;"
+                            f"border-radius:20px;padding:2px 10px;font-size:11px;color:#39D0FF'>{s}</span> "
+                            for s in _srcs
+                        )
+                        st.markdown(
+                            f"<div style='background:rgba(22,27,34,.8);border:1px solid #21262D;"
+                            f"border-left:3px solid #39D0FF;border-radius:14px;padding:20px 24px;margin:10px 0'>"
+                            f"<div style='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px'>"
+                            f"<div>"
+                            f"  <span style='color:#E6EDF3;font-size:17px;font-weight:700'>{_i}. {_med['name']}</span><br>"
+                            f"  <span style='color:#8B949E;font-size:13px'>Dose: {_med['dose']} &nbsp;·&nbsp; Duration: {_med['duration']}</span>"
+                            f"</div>"
+                            f"<div style='text-align:right'>{_src_pills}</div>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
+                        st.markdown(_med["explanation"])
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                    # Download as PDF
+                    _rx_msgs = [
+                        {"role": "user", "content": "Decode my prescription"},
+                        {"role": "assistant", "content": "\n\n".join(
+                            f"**{m['name']}** ({m['dose']}, {m['duration']})\n{m['explanation']}"
+                            for m in _meds
+                        )},
+                    ]
+                    _rx_pdf = generate_report(_rx_msgs, severity="", city=_city)
+                    st.download_button(
+                        label="📄 Download Prescription Summary as PDF",
+                        data=_rx_pdf,
+                        file_name=f"prescription_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                        mime="application/pdf",
+                    )
+
+            except Exception as _e:
+                st.error(f"Prescription analysis failed: {_e}")
+            finally:
+                if _tmp_rx and os.path.exists(_tmp_rx):
+                    try: os.unlink(_tmp_rx)
                     except OSError: pass
 
 # ─────────────────────────────────────────────────────────────────────────────
