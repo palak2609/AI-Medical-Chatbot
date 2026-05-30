@@ -7,20 +7,46 @@ _CACHE_TTL = 600  # 10 minutes
 
 
 def get_user_location():
+    """Auto-detect location via IP. Returns None if blocked/rate-limited."""
     try:
         r = requests.get("http://ip-api.com/json/", timeout=5)
         data = r.json()
         if data.get("status") == "success":
             return {
-                "city": data.get("city", "Unknown"),
-                "region": data.get("regionName", ""),
+                "city":    data.get("city", "Unknown"),
+                "region":  data.get("regionName", ""),
                 "country": data.get("country", "Unknown"),
-                "lat": data.get("lat"),
-                "lon": data.get("lon"),
+                "lat":     data.get("lat"),
+                "lon":     data.get("lon"),
             }
     except Exception:
         pass
     return None
+
+
+def geocode_city(city_name: str) -> dict | None:
+    """Convert a city name to lat/lon using Open-Meteo geocoding (free, no key)."""
+    if not city_name or not city_name.strip():
+        return None
+    try:
+        r = requests.get(
+            "https://geocoding-api.open-meteo.com/v1/search",
+            params={"name": city_name.strip(), "count": 1, "language": "en", "format": "json"},
+            timeout=5,
+        )
+        results = r.json().get("results", [])
+        if not results:
+            return None
+        res = results[0]
+        return {
+            "city":    res.get("name", city_name),
+            "region":  res.get("admin1", ""),
+            "country": res.get("country", ""),
+            "lat":     res.get("latitude"),
+            "lon":     res.get("longitude"),
+        }
+    except Exception:
+        return None
 
 
 def get_weather(lat, lon):
