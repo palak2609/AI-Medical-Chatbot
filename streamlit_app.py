@@ -30,8 +30,11 @@ from src.voice_output          import text_to_speech
 from src.vitals                import METRICS, status, status_color
 from src.drug_interaction      import check_interaction
 from src.database              import (is_cloud, save_consultation, get_consultations,
-                                       save_vital, get_vitals, save_prescription)
+                                       save_vital, get_vitals, save_prescription,
+                                       save_mood, get_today_mood, get_mood_history,
+                                       save_food_log, get_food_logs, get_today_calories)
 from src.auth                  import login as auth_login, register as auth_register
+from src.food_analyzer         import analyze_food_text, analyze_food_photo
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
@@ -957,7 +960,7 @@ if _env:
 # ─────────────────────────────────────────────────────────────────────────────
 # TABS
 # ─────────────────────────────────────────────────────────────────────────────
-_tab_chat, _tab_report = st.tabs(["💬 Consultation", "🔬 Analyze Medical Report"])
+_tab_chat, _tab_report, _tab_dash = st.tabs(["💬 Consultation", "🔬 Analyze Medical Report", "📊 My Dashboard"])
 
 # ══════════════════════════ REPORT ANALYSIS TAB ═══════════════════════════════
 with _tab_report:
@@ -1150,6 +1153,263 @@ with _tab_report:
                 if _tmp_rx and os.path.exists(_tmp_rx):
                     try: os.unlink(_tmp_rx)
                     except OSError: pass
+
+# ══════════════════════════ DASHBOARD TAB ═════════════════════════════════════
+with _tab_dash:
+    import plotly.graph_objects as go
+
+    _u_name  = st.session_state.user.get("name") or st.session_state.username
+    _u_cond  = st.session_state.user.get("conditions", "")
+    _hour    = datetime.now().hour
+    _greeting = "Good morning" if _hour < 12 else ("Good afternoon" if _hour < 17 else "Good evening")
+
+    st.markdown(
+        f"<h2 style='color:#E6EDF3;font-size:26px;font-weight:700;margin-bottom:4px'>"
+        f"{_greeting}, {_u_name}! 👋</h2>"
+        f"<p style='color:#6E7681;font-size:15px;margin-bottom:24px'>"
+        f"{datetime.now().strftime('%A, %d %B %Y')}"
+        + (f" &nbsp;·&nbsp; {_u_cond}" if _u_cond else "") + "</p>",
+        unsafe_allow_html=True,
+    )
+
+    # ── Section 1: Daily mood check-in ───────────────────────────────────────
+    st.markdown("### 🌡️ How are you feeling today?")
+    _today_mood = get_today_mood(st.session_state.user_id)
+    _moods = {
+        "😊 Great":   "great",
+        "🙂 Good":    "good",
+        "😐 Okay":    "okay",
+        "😔 Low":     "low",
+        "😫 Unwell":  "unwell",
+    }
+    _mood_cols = st.columns(len(_moods))
+    _selected_mood = _today_mood["mood"] if _today_mood else None
+
+    for _ci, (_label, _val) in enumerate(_moods.items()):
+        with _mood_cols[_ci]:
+            _active = _selected_mood == _val
+            _border = "#39D0FF" if _active else "#21262D"
+            _bg     = "rgba(57,208,255,.1)" if _active else "#161B22"
+            if st.button(
+                _label, key=f"mood_{_val}", use_container_width=True,
+            ):
+                save_mood(st.session_state.user_id, _val)
+                st.rerun()
+            if _active:
+                st.markdown(
+                    f"<div style='height:3px;background:#39D0FF;border-radius:2px;margin-top:-8px'></div>",
+                    unsafe_allow_html=True,
+                )
+
+    if _today_mood:
+        _note_val = _today_mood.get("note", "")
+        _new_note = st.text_input("Add a note (optional)", value=_note_val,
+                                  placeholder="e.g. Feeling tired after work…", key="mood_note")
+        if _new_note != _note_val and st.button("Save note", key="save_mood_note"):
+            save_mood(st.session_state.user_id, _today_mood["mood"], _new_note)
+            st.rerun()
+
+    # Mood history (last 7 days)
+    _mood_hist = get_mood_history(st.session_state.user_id, 7)
+    if len(_mood_hist) > 1:
+        _mood_score = {"great": 5, "good": 4, "okay": 3, "low": 2, "unwell": 1}
+        _mh_dates  = [e["date"] for e in reversed(_mood_hist)]
+        _mh_scores = [_mood_score.get(e["mood"], 3) for e in reversed(_mood_hist)]
+        _mh_fig = go.Figure(go.Scatter(
+            x=_mh_dates, y=_mh_scores, mode="lines+markers",
+            line=dict(color="#39D0FF", width=2),
+            marker=dict(size=8, color="#39D0FF"),
+            fill="tozeroy", fillcolor="rgba(57,208,255,0.07)",
+        ))
+        _mh_fig.update_layout(
+            paper_bgcolor="#0D1117", plot_bgcolor="#0D1117",
+            height=120, margin=dict(l=0, r=0, t=10, b=20),
+            yaxis=dict(tickvals=[1,2,3,4,5],
+                       ticktext=["Unwell","Low","Okay","Good","Great"],
+                       tickfont=dict(color="#8B949E", size=10), gridcolor="#1C2128"),
+            xaxis=dict(tickfont=dict(color="#8B949E", size=10), gridcolor="#1C2128"),
+            showlegend=False,
+        )
+        st.plotly_chart(_mh_fig, use_container_width=True)
+
+    st.markdown("---")
+
+    # ── Section 2: Health stats ───────────────────────────────────────────────
+    st.markdown("### 📈 Your Health Stats")
+
+    _vdata_dash = get_vitals(st.session_state.user_id, limit=30)
+    _cons_dash  = get_consultations(st.session_state.user_id, limit=30)
+    _today_cal  = get_today_calories(st.session_state.user_id)
+
+    _stat_cols = st.columns(4)
+    _stat_items = [
+        ("Consultations", str(len(_cons_dash)), "this month", "#58A6FF"),
+        ("Today's Calories", f"{_today_cal} kcal", "logged today", "#3FB950"),
+        ("Last BP", "", "mmHg", "#FFA040"),
+        ("Last Glucose", "", "mg/dL", "#E5B000"),
+    ]
+
+    # Fill dynamic vitals
+    if _vdata_dash:
+        _last_bp_sys = next((e.get("systolic_bp") for e in reversed(_vdata_dash) if e.get("systolic_bp")), None)
+        _last_bp_dia = next((e.get("diastolic_bp") for e in reversed(_vdata_dash) if e.get("diastolic_bp")), None)
+        _last_glc    = next((e.get("glucose")      for e in reversed(_vdata_dash) if e.get("glucose")), None)
+        if _last_bp_sys and _last_bp_dia:
+            _stat_items[2] = ("Last BP", f"{int(_last_bp_sys)}/{int(_last_bp_dia)}", "mmHg", "#FFA040")
+        if _last_glc:
+            _stat_items[3] = ("Last Glucose", f"{int(_last_glc)}", "mg/dL", "#E5B000")
+
+    for _ci, (_label, _val, _sub, _col) in enumerate(_stat_items):
+        with _stat_cols[_ci]:
+            st.markdown(
+                f"<div style='background:#161B22;border:1px solid #21262D;border-top:3px solid {_col};"
+                f"border-radius:12px;padding:16px;text-align:center'>"
+                f"<div style='color:#8B949E;font-size:11px;font-weight:700;text-transform:uppercase;"
+                f"letter-spacing:1px'>{_label}</div>"
+                f"<div style='color:{_col};font-size:26px;font-weight:800;margin:6px 0'>"
+                f"{'—' if not _val else _val}</div>"
+                f"<div style='color:#484F58;font-size:11px'>{_sub}</div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+    # Mini vitals trend (last 14 days)
+    if len(_vdata_dash) >= 2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        _vt_cols = st.columns(2)
+        _metric_pairs = [
+            ("systolic_bp",  "Systolic BP",  "#FF6B6B", _vt_cols[0]),
+            ("glucose",      "Blood Glucose","#E5B000", _vt_cols[1]),
+        ]
+        for _key, _title, _color, _col in _metric_pairs:
+            _pts = [(e.get("timestamp","")[:10], e[_key])
+                    for e in _vdata_dash if e.get(_key)]
+            if len(_pts) < 2:
+                continue
+            _xs, _ys = zip(*_pts)
+            with _col:
+                _fig = go.Figure(go.Scatter(
+                    x=list(_xs), y=list(_ys), mode="lines+markers",
+                    line=dict(color=_color, width=2),
+                    marker=dict(size=5, color=_color),
+                    fill="tozeroy", fillcolor=f"rgba{tuple(int(_color.lstrip('#')[i:i+2],16) for i in (0,2,4))+(0.07,)}",
+                ))
+                _fig.update_layout(
+                    title=dict(text=_title, font=dict(color="#C9D1D9", size=13)),
+                    paper_bgcolor="#0D1117", plot_bgcolor="#161B22",
+                    height=180, margin=dict(l=0, r=0, t=30, b=10),
+                    xaxis=dict(tickfont=dict(color="#6E7681", size=9), gridcolor="#1C2128", showgrid=True),
+                    yaxis=dict(tickfont=dict(color="#6E7681", size=9), gridcolor="#1C2128", showgrid=True),
+                    showlegend=False,
+                )
+                st.plotly_chart(_fig, use_container_width=True)
+
+    st.markdown("---")
+
+    # ── Section 3: Food & Calorie Tracker ────────────────────────────────────
+    st.markdown("### 🍽️ Food & Calorie Tracker")
+    st.caption("Log what you ate — text description or a photo of your meal.")
+
+    _food_tab1, _food_tab2 = st.tabs(["📝 Describe your meal", "📸 Photo of meal"])
+
+    _RATING_STYLE = {
+        "HEALTHY":   ("#3FB950", "🟢 Healthy"),
+        "MODERATE":  ("#E5B000", "🟡 Moderate"),
+        "UNHEALTHY": ("#FF6B6B", "🔴 Unhealthy"),
+    }
+
+    def _render_food_result(desc: str, result: dict):
+        _rc, _lbl = _RATING_STYLE.get(result["rating"], ("#8B949E", "—"))
+        st.markdown(
+            f"<div style='background:#161B22;border:1px solid #21262D;border-left:3px solid {_rc};"
+            f"border-radius:12px;padding:18px 22px;margin:12px 0'>"
+            f"<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:14px'>"
+            f"<div style='color:#E6EDF3;font-size:15px;font-weight:600'>{desc[:60]}</div>"
+            f"<div style='color:{_rc};font-size:13px;font-weight:700'>{_lbl}</div>"
+            f"</div>"
+            f"<div style='display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px'>"
+            + "".join(
+                f"<div style='text-align:center;background:#0D1117;border-radius:8px;padding:8px 14px'>"
+                f"<div style='color:#8B949E;font-size:10px;font-weight:700;text-transform:uppercase'>{n}</div>"
+                f"<div style='color:#E6EDF3;font-size:18px;font-weight:800'>{v}</div>"
+                f"</div>"
+                for n, v in [
+                    ("Calories", f"{result['calories']} kcal"),
+                    ("Protein",  f"{result['protein']}g"),
+                    ("Carbs",    f"{result['carbs']}g"),
+                    ("Fat",      f"{result['fat']}g"),
+                    ("Fiber",    f"{result['fiber']}g"),
+                ]
+            )
+            + f"</div></div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(result["text"])
+        save_food_log(st.session_state.user_id, desc, result)
+
+    with _food_tab1:
+        _food_desc = st.text_area(
+            "What did you eat?",
+            placeholder="e.g. 2 rotis with dal and sabzi, 1 glass of lassi",
+            height=80, key="food_text_input",
+        )
+        if st.button("🔍 Analyze Meal", type="primary", key="analyze_food_text"):
+            if _food_desc.strip():
+                with st.spinner("Calculating nutrition…"):
+                    _food_result = analyze_food_text(
+                        _food_desc,
+                        profile=st.session_state.patient_profile,
+                    )
+                _render_food_result(_food_desc[:60], _food_result)
+            else:
+                st.warning("Please describe what you ate.")
+
+    with _food_tab2:
+        _food_img = st.file_uploader(
+            "Upload a photo of your meal",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="food_img_upload",
+        )
+        if _food_img:
+            st.image(_food_img, width=300)
+        if _food_img and st.button("🔍 Analyze Photo", type="primary", key="analyze_food_photo"):
+            _tmp_food = None
+            try:
+                _ext_f = _food_img.name.rsplit(".", 1)[-1]
+                _tf = tempfile.NamedTemporaryFile(delete=False, suffix=f".{_ext_f}")
+                _tf.write(_food_img.read()); _tf.close()
+                _tmp_food = _tf.name
+                with st.spinner("Identifying food and calculating nutrition…"):
+                    _food_result = analyze_food_photo(
+                        _tmp_food,
+                        profile=st.session_state.patient_profile,
+                    )
+                _render_food_result("Meal from photo", _food_result)
+            except Exception as _e:
+                st.error(f"Analysis failed: {_e}")
+            finally:
+                if _tmp_food and os.path.exists(_tmp_food):
+                    try: os.unlink(_tmp_food)
+                    except OSError: pass
+
+    # Today's food log
+    _today_logs = [
+        e for e in get_food_logs(st.session_state.user_id, 20)
+        if e.get("timestamp", "")[:10] == datetime.now().strftime("%Y-%m-%d")
+    ]
+    if _today_logs:
+        st.markdown(f"**Today's log — {sum(e.get('calories',0) for e in _today_logs)} kcal total**")
+        for _fl in _today_logs:
+            _rc2, _lbl2 = _RATING_STYLE.get(_fl.get("rating",""), ("#8B949E","—"))
+            st.markdown(
+                f"<div style='display:flex;justify-content:space-between;align-items:center;"
+                f"background:#161B22;border-radius:8px;padding:10px 14px;margin:4px 0'>"
+                f"<span style='color:#C9D1D9;font-size:13px'>{_fl.get('description','')[:50]}</span>"
+                f"<span style='color:{_rc2};font-size:12px;font-weight:700'>"
+                f"{_fl.get('calories',0)} kcal &nbsp; {_lbl2}</span>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # HELPERS (defined before tabs so both tabs can use them)

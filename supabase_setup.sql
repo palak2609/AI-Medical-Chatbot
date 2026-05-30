@@ -53,10 +53,39 @@ CREATE TABLE IF NOT EXISTS prescriptions (
 );
 ALTER TABLE prescriptions ENABLE ROW LEVEL SECURITY;
 
+-- Daily mood check-ins
+CREATE TABLE IF NOT EXISTS mood_logs (
+    id        TEXT PRIMARY KEY,
+    user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    date      TEXT NOT NULL,
+    mood      TEXT,
+    note      TEXT DEFAULT '',
+    timestamp TEXT
+);
+ALTER TABLE mood_logs ENABLE ROW LEVEL SECURITY;
+
+-- Food / calorie logs
+CREATE TABLE IF NOT EXISTS food_logs (
+    id          TEXT PRIMARY KEY,
+    user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    timestamp   TEXT,
+    description TEXT,
+    calories    INTEGER DEFAULT 0,
+    protein     REAL DEFAULT 0,
+    carbs       REAL DEFAULT 0,
+    fat         REAL DEFAULT 0,
+    fiber       REAL DEFAULT 0,
+    rating      TEXT DEFAULT 'MODERATE',
+    analysis    TEXT
+);
+ALTER TABLE food_logs ENABLE ROW LEVEL SECURITY;
+
 -- Indexes for fast per-user lookups
 CREATE INDEX IF NOT EXISTS idx_consultations_user ON consultations(user_id);
 CREATE INDEX IF NOT EXISTS idx_vitals_user        ON vitals(user_id);
 CREATE INDEX IF NOT EXISTS idx_prescriptions_user ON prescriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_mood_user          ON mood_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_food_user          ON food_logs(user_id);
 
 -- ═══════════════════════════════════════════════════════════════════
 -- NOTE: We use the service_role key in our Python backend.

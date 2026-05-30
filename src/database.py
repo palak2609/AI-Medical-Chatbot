@@ -58,6 +58,27 @@ def _boot_sqlite():
             timestamp TEXT,
             medicines TEXT
         );
+        CREATE TABLE IF NOT EXISTS mood_logs (
+            id        TEXT PRIMARY KEY,
+            user_id   TEXT NOT NULL,
+            date      TEXT NOT NULL,
+            mood      TEXT,
+            note      TEXT DEFAULT '',
+            timestamp TEXT
+        );
+        CREATE TABLE IF NOT EXISTS food_logs (
+            id          TEXT PRIMARY KEY,
+            user_id     TEXT NOT NULL,
+            timestamp   TEXT,
+            description TEXT,
+            calories    INTEGER DEFAULT 0,
+            protein     REAL DEFAULT 0,
+            carbs       REAL DEFAULT 0,
+            fat         REAL DEFAULT 0,
+            fiber       REAL DEFAULT 0,
+            rating      TEXT DEFAULT 'MODERATE',
+            analysis    TEXT
+        );
     """)
     conn.commit()
     conn.close()
@@ -291,3 +312,128 @@ def get_prescriptions(user_id: str, limit: int = 20) -> list:
             (user_id, limit)
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MOOD OPERATIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def save_mood(user_id: str, mood: str, note: str = "") -> None:
+    today = datetime.now().strftime("%Y-%m-%d")
+    record = {"id": _uid(), "user_id": user_id, "date": today,
+               "mood": mood, "note": note, "timestamp": _now()}
+    if _cloud:
+        try:
+            # Upsert by user_id + date (one mood per day)
+            existing = (_sb.table("mood_logs").select("id")
+                        .eq("user_id", user_id).eq("date", today).execute())
+            if existing.data:
+                _sb.table("mood_logs").update({"mood": mood, "note": note, "timestamp": _now()}) \
+                   .eq("id", existing.data[0]["id"]).execute()
+            else:
+                _sb.table("mood_logs").insert(record).execute()
+            return
+        except Exception:
+            pass
+    with _conn() as c:
+        c.execute("DELETE FROM mood_logs WHERE user_id=? AND date=?", (user_id, today))
+        c.execute("INSERT INTO mood_logs (id,user_id,date,mood,note,timestamp) VALUES (?,?,?,?,?,?)",
+                  (record["id"], user_id, today, mood, note, record["timestamp"]))
+        c.commit()
+
+
+def get_today_mood(user_id: str) -> dict | None:
+    today = datetime.now().strftime("%Y-%m-%d")
+    if _cloud:
+        try:
+            r = (_sb.table("mood_logs").select("*")
+                 .eq("user_id", user_id).eq("date", today).execute())
+            return r.data[0] if r.data else None
+        except Exception:
+            pass
+    with _conn() as c:
+        row = c.execute("SELECT * FROM mood_logs WHERE user_id=? AND date=?",
+                        (user_id, today)).fetchone()
+    return dict(row) if row else None
+
+
+def get_mood_history(user_id: str, days: int = 7) -> list:
+    if _cloud:
+        try:
+            r = (_sb.table("mood_logs").select("date,mood,note")
+                 .eq("user_id", user_id).order("date", desc=True).limit(days).execute())
+            return r.data
+        except Exception:
+            pass
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT date,mood,note FROM mood_logs WHERE user_id=? ORDER BY date DESC LIMIT ?",
+            (user_id, days)
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FOOD LOG OPERATIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def save_food_log(user_id: str, description: str, analysis: dict) -> None:
+    record = {
+        "id":          _uid(),
+        "user_id":     user_id,
+        "timestamp":   _now(),
+        "description": description[:500],
+        "calories":    analysis.get("calories", 0),
+        "protein":     analysis.get("protein", 0),
+        "carbs":       analysis.get("carbs", 0),
+        "fat":         analysis.get("fat", 0),
+        "fiber":       analysis.get("fiber", 0),
+        "rating":      analysis.get("rating", "MODERATE"),
+        "analysis":    analysis.get("text", ""),
+    }
+    if _cloud:
+        try:
+            _sb.table("food_logs").insert(record).execute()
+            return
+        except Exception:
+            pass
+    with _conn() as c:
+        c.execute("""
+            INSERT INTO food_logs
+            (id,user_id,timestamp,description,calories,protein,carbs,fat,fiber,rating,analysis)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        """, tuple(record.values()))
+        c.commit()
+
+
+def get_food_logs(user_id: str, limit: int = 10) -> list:
+    if _cloud:
+        try:
+            r = (_sb.table("food_logs").select("*")
+                 .eq("user_id", user_id).order("timestamp", desc=True).limit(limit).execute())
+            return r.data
+        except Exception:
+            pass
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT * FROM food_logs WHERE user_id=? ORDER BY timestamp DESC LIMIT ?",
+            (user_id, limit)
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_today_calories(user_id: str) -> int:
+    today = datetime.now().strftime("%Y-%m-%d")
+    if _cloud:
+        try:
+            r = (_sb.table("food_logs").select("calories")
+                 .eq("user_id", user_id).gte("timestamp", today).execute())
+            return sum(e.get("calories", 0) for e in r.data)
+        except Exception:
+            pass
+    with _conn() as c:
+        rows = c.execute(
+            "SELECT calories FROM food_logs WHERE user_id=? AND timestamp >= ?",
+            (user_id, today)
+        ).fetchall()
+    return sum(r["calories"] for r in rows)

@@ -6,6 +6,7 @@ load_dotenv()
 
 from src.voice_input    import transcribe_audio
 from src.rag_pipeline   import ask_rag
+from src.validator      import is_valid_query
 from src.vision         import analyze_image_with_query
 from src.emergency      import detect_emergency
 from src.hospital_finder import find_nearby_hospitals
@@ -46,7 +47,21 @@ def process(
             "severity": "MILD",
             "is_emergency": False,
             "hospitals": None,
+            "sources":   [],
         }
+
+    # 1b. Validate query — reject gibberish before hitting RAG/LLM
+    if query and not image_path:
+        valid, err_msg = is_valid_query(query)
+        if not valid:
+            return {
+                "query":        query,
+                "response":     err_msg,
+                "severity":     "MILD",
+                "is_emergency": False,
+                "hospitals":    None,
+                "sources":      [],
+            }
 
     # 2. Build conversation history context
     history_text = ""
