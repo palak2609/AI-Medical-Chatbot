@@ -32,6 +32,10 @@ python-dotenv==1.1.0
 # HTTP (hospital finder, weather, geolocation)
 requests>=2.31.0
 
+# Auth & Database
+bcrypt>=4.0.0
+supabase>=2.0.0
+
 # Streamlit frontend
 streamlit>=1.34.0
 

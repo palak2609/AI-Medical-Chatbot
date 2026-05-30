@@ -27,8 +27,11 @@ from src.translator      import LANGUAGES, to_english, from_english
 from src.report_analyzer      import analyze_pdf, analyze_image_report
 from src.prescription_analyzer import analyze_prescription
 from src.voice_output          import text_to_speech
-from src.vitals                import METRICS, add_reading, load_vitals, status, status_color, clear_vitals, latest
+from src.vitals                import METRICS, status, status_color
 from src.drug_interaction      import check_interaction
+from src.database              import (is_cloud, save_consultation, get_consultations,
+                                       save_vital, get_vitals, save_prescription)
+from src.auth                  import login as auth_login, register as auth_register
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
@@ -398,25 +401,125 @@ _defaults = {
     "voice_output":        True,
     "patient_profile":     {"name": "", "age": "", "conditions": ""},
     "manual_city":         "",
+    # Auth
+    "logged_in":           False,
+    "user_id":             "",
+    "username":            "",
+    "user":                {},
+    "auth_tab":            "Login",
 }
 for k, v in _defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SIDEBAR
+# LOGIN PAGE  (shown when not authenticated)
 # ─────────────────────────────────────────────────────────────────────────────
-with st.sidebar:
+BLOOD_GROUPS = ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+
+def _show_login():
     st.markdown(
-        "<div style='padding:4px 0 12px'>"
-        "<div style='font-size:19px;font-weight:800;color:#E6EDF3;letter-spacing:-.3px'>🏥 MediAssist AI</div>"
-        "<div style='display:flex;align-items:center;gap:6px;margin-top:5px'>"
-        "<span style='width:7px;height:7px;border-radius:50%;background:#3FB950;"
-        "box-shadow:0 0 6px #3FB950;display:inline-block'></span>"
-        "<span style='font-size:12px;color:#6E7681;font-weight:500'>System Online</span>"
+        "<div style='max-width:420px;margin:60px auto 0'>"
+        "<div style='text-align:center;margin-bottom:32px'>"
+        "<div style='font-size:40px;margin-bottom:8px'>🏥</div>"
+        "<div style='background:linear-gradient(135deg,#E6EDF3,#39D0FF);"
+        "-webkit-background-clip:text;-webkit-text-fill-color:transparent;"
+        "font-size:28px;font-weight:800;letter-spacing:-0.5px'>MediAssist AI</div>"
+        "<div style='color:#484F58;font-size:14px;margin-top:4px'>AI-Powered Healthcare Platform</div>"
         "</div></div>",
         unsafe_allow_html=True,
     )
+
+    _l_col, _form_col, _r_col = st.columns([1, 2, 1])
+    with _form_col:
+        _tab_l, _tab_r = st.tabs(["🔑 Login", "📝 Register"])
+
+        # ── Login tab ────────────────────────────────────────────────────────
+        with _tab_l:
+            _lu = st.text_input("Username", key="login_u", placeholder="your username")
+            _lp = st.text_input("Password", type="password", key="login_p", placeholder="••••••••")
+            if st.button("Login", use_container_width=True, type="primary", key="login_btn"):
+                ok, user, err = auth_login(_lu, _lp)
+                if ok:
+                    st.session_state.logged_in = True
+                    st.session_state.user_id   = user["id"]
+                    st.session_state.username  = user["username"]
+                    st.session_state.user      = user
+                    st.session_state.patient_profile = {
+                        "name":       user.get("name", ""),
+                        "age":        user.get("age", ""),
+                        "conditions": user.get("conditions", ""),
+                    }
+                    st.rerun()
+                else:
+                    st.error(err)
+
+        # ── Register tab ─────────────────────────────────────────────────────
+        with _tab_r:
+            _ru   = st.text_input("Username*",   key="reg_u",   placeholder="choose a username")
+            _re   = st.text_input("Email",        key="reg_e",   placeholder="optional")
+            _rp   = st.text_input("Password*",    type="password", key="reg_p",  placeholder="min 6 chars")
+            _rp2  = st.text_input("Confirm Password*", type="password", key="reg_p2", placeholder="repeat password")
+            st.markdown("<p style='color:#484F58;font-size:12px;margin:8px 0 2px'>Optional health profile</p>", unsafe_allow_html=True)
+            _rname = st.text_input("Full Name",   key="reg_name", placeholder="e.g. Rahul Sharma")
+            _rage  = st.text_input("Age",          key="reg_age",  placeholder="e.g. 28")
+            _rbg   = st.selectbox("Blood Group",   BLOOD_GROUPS,   key="reg_bg")
+            _rcond = st.text_area("Existing Conditions / Medications", key="reg_cond",
+                                  placeholder="e.g. Diabetic, on Metformin 500mg", height=70)
+            if st.button("Create Account", use_container_width=True, type="primary", key="reg_btn"):
+                ok, user, err = auth_register(_ru, _re, _rp, _rp2, _rname, _rage, _rbg, _rcond)
+                if ok:
+                    st.session_state.logged_in = True
+                    st.session_state.user_id   = user["id"]
+                    st.session_state.username  = user["username"]
+                    st.session_state.user      = user
+                    st.session_state.patient_profile = {
+                        "name": _rname, "age": _rage, "conditions": _rcond,
+                    }
+                    st.success("Account created! Welcome to MediAssist AI.")
+                    st.rerun()
+                else:
+                    st.error(err)
+
+        st.markdown(
+            "<p style='text-align:center;color:#484F58;font-size:12px;margin-top:20px'>"
+            "Your medical data is stored securely.<br>Never share your password.</p>",
+            unsafe_allow_html=True,
+        )
+
+if not st.session_state.logged_in:
+    _show_login()
+    st.stop()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SIDEBAR
+# ─────────────────────────────────────────────────────────────────────────────
+with st.sidebar:
+    # ── Branding + user info ──────────────────────────────────────────────────
+    _db_dot   = ("#3FB950", "Cloud DB ✓") if is_cloud() else ("#E5B000", "Local DB")
+    _u        = st.session_state.user
+    _disp     = _u.get("name") or st.session_state.username
+    _subtitle = []
+    if _u.get("age"):        _subtitle.append(f"{_u['age']}y")
+    if _u.get("blood_group"): _subtitle.append(_u["blood_group"])
+    if _u.get("conditions"):  _subtitle.append(_u["conditions"][:30])
+    st.markdown(
+        "<div style='padding:4px 0 10px'>"
+        "<div style='font-size:18px;font-weight:800;color:#E6EDF3;letter-spacing:-.3px'>🏥 MediAssist AI</div>"
+        f"<div style='color:#C9D1D9;font-size:14px;font-weight:600;margin-top:8px'>👤 {_disp}</div>"
+        f"<div style='color:#6E7681;font-size:12px'>@{st.session_state.username}"
+        + (f" · {' · '.join(_subtitle)}" if _subtitle else "") + "</div>"
+        "<div style='display:flex;align-items:center;gap:6px;margin-top:6px'>"
+        f"<span style='width:7px;height:7px;border-radius:50%;background:{_db_dot[0]};"
+        f"box-shadow:0 0 6px {_db_dot[0]};display:inline-block'></span>"
+        f"<span style='font-size:11px;color:#6E7681;font-weight:500'>{_db_dot[1]}</span>"
+        "</div></div>",
+        unsafe_allow_html=True,
+    )
+    if st.button("🚪 Logout", use_container_width=True, key="logout_btn"):
+        for _k in list(st.session_state.keys()):
+            del st.session_state[_k]
+        st.rerun()
     st.divider()
 
     # ── Environmental context ─────────────────────────────────────────────────
@@ -607,7 +710,7 @@ with st.sidebar:
     with st.expander("📈 Health Vitals Tracker"):
         import plotly.graph_objects as go
 
-        _vdata = load_vitals()
+        _vdata = get_vitals(st.session_state.user_id)
 
         # Log new reading
         st.markdown("<p style='color:#C9D1D9;font-size:13px;font-weight:600;margin-bottom:6px'>Log Today's Reading</p>", unsafe_allow_html=True)
@@ -628,7 +731,7 @@ with st.sidebar:
                 "weight": _v_wt, "spo2": _v_spo2,
             }.items() if v is not None}
             if _new:
-                add_reading(_new)
+                save_vital(st.session_state.user_id, _new)
                 st.success("Reading saved.")
                 st.rerun()
             else:
@@ -639,7 +742,8 @@ with st.sidebar:
             st.markdown("<p style='color:#C9D1D9;font-size:13px;font-weight:600;margin:10px 0 6px'>Latest Values</p>", unsafe_allow_html=True)
             _summary_html = "<div style='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px'>"
             for _key, _cfg in METRICS.items():
-                _lv = latest(_key)
+                # latest value from DB records
+                _lv = next((e[_key] for e in reversed(_vdata) if e.get(_key) is not None), None)
                 if _lv is None:
                     continue
                 _sc = status_color(status(_key, _lv))
@@ -655,7 +759,7 @@ with st.sidebar:
             st.markdown(_summary_html, unsafe_allow_html=True)
 
             # Chart for each metric that has data
-            _dates = [e.get("date_display", e.get("timestamp",""))[:11] for e in _vdata]
+            _dates = [e.get("timestamp", "")[:10] for e in _vdata]
             for _key, _cfg in METRICS.items():
                 _vals = [e.get(_key) for e in _vdata]
                 _pairs = [(d, v) for d, v in zip(_dates, _vals) if v is not None]
@@ -716,26 +820,30 @@ with st.sidebar:
 
     # ── Medical History ───────────────────────────────────────────────────────
     with st.expander("📋 Consultation History"):
-        _hist = load_history()
-        if not _hist:
-            st.info("No past consultations saved yet.")
+        _db_hist = get_consultations(st.session_state.user_id, limit=10)
+        if not _db_hist:
+            st.info("No past consultations yet.")
         else:
-            for _entry in _hist[:10]:
-                _sev = _entry.get("severity", "MILD")
-                _pill = (
-                    f"<span class='hist-pill hist-{_sev}'>{_sev}</span>"
-                )
+            for _entry in _db_hist:
+                _sev  = _entry.get("severity", "MILD")
+                _ts   = (_entry.get("timestamp") or "")[:16].replace("T", " ")
+                _city_h = _entry.get("city", "")
+                _pill = f"<span class='hist-pill hist-{_sev}'>{_sev}</span>"
+                # Parse first user message as the complaint
+                try:
+                    import json as _j
+                    _msgs_raw = _entry.get("messages") or "[]"
+                    _msgs = _j.loads(_msgs_raw) if isinstance(_msgs_raw, str) else _msgs_raw
+                    _complaint = next((m["content"] for m in _msgs if m.get("role") == "user"), "—")
+                except Exception:
+                    _complaint = "—"
                 st.markdown(
-                    f"**{_entry['date_display']}** {_pill}<br>"
-                    f"<span style='color:#C9D1D9;font-size:14px'>{_entry['main_complaint'][:80]}</span>",
+                    f"**{_ts}** {_pill}"
+                    + (f" · {_city_h}" if _city_h else "") + "<br>"
+                    f"<span style='color:#C9D1D9;font-size:13px'>{str(_complaint)[:80]}</span>",
                     unsafe_allow_html=True,
                 )
-                with st.expander("View AI summary", expanded=False):
-                    st.write(_entry.get("ai_summary", "—"))
                 st.markdown("---")
-            if st.button("🗑️ Clear All History", use_container_width=True):
-                clear_history()
-                st.rerun()
 
     st.divider()
 
@@ -1017,6 +1125,9 @@ with _tab_report:
                         st.markdown(_med["explanation"])
                         st.markdown("</div>", unsafe_allow_html=True)
 
+                    # Save to DB
+                    save_prescription(st.session_state.user_id, _meds)
+
                     # Download as PDF
                     _rx_msgs = [
                         {"role": "user", "content": "Decode my prescription"},
@@ -1184,7 +1295,15 @@ def run_analysis(prompt_text: str):
             "first_aid_html": _fa_rendered,
             "sources":        _result.get("sources", []),
         })
-        # Upsert — same session_id updates the same history entry
+        # Save to DB (cloud or local SQLite fallback)
+        save_consultation(
+            user_id    = st.session_state.user_id,
+            session_id = st.session_state.session_id,
+            messages   = st.session_state.messages,
+            severity   = st.session_state.worst_severity,
+            city       = _city,
+        )
+        # Also keep local JSON as secondary backup
         save_session(
             st.session_state.messages,
             st.session_state.worst_severity,
