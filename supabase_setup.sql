@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     conditions    TEXT DEFAULT '',
     created_at    TEXT
 );
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 -- Consultations (full chat sessions per user)
 CREATE TABLE IF NOT EXISTS consultations (
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS consultations (
     city       TEXT DEFAULT '',
     timestamp  TEXT
 );
+ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 
 -- Vitals (health readings per user)
 CREATE TABLE IF NOT EXISTS vitals (
@@ -40,6 +42,7 @@ CREATE TABLE IF NOT EXISTS vitals (
     weight       REAL,
     spo2         REAL
 );
+ALTER TABLE vitals ENABLE ROW LEVEL SECURITY;
 
 -- Prescriptions (decoded prescriptions per user)
 CREATE TABLE IF NOT EXISTS prescriptions (
@@ -48,8 +51,15 @@ CREATE TABLE IF NOT EXISTS prescriptions (
     timestamp TEXT,
     medicines JSONB
 );
+ALTER TABLE prescriptions ENABLE ROW LEVEL SECURITY;
 
 -- Indexes for fast per-user lookups
 CREATE INDEX IF NOT EXISTS idx_consultations_user ON consultations(user_id);
 CREATE INDEX IF NOT EXISTS idx_vitals_user        ON vitals(user_id);
 CREATE INDEX IF NOT EXISTS idx_prescriptions_user ON prescriptions(user_id);
+
+-- ═══════════════════════════════════════════════════════════════════
+-- NOTE: We use the service_role key in our Python backend.
+-- service_role bypasses RLS entirely — no policies needed.
+-- Tables are safe: anon/public cannot access them without policies.
+-- ═══════════════════════════════════════════════════════════════════
