@@ -27,6 +27,8 @@ from src.translator      import LANGUAGES, to_english, from_english
 from src.report_analyzer      import analyze_pdf, analyze_image_report
 from src.prescription_analyzer import analyze_prescription
 from src.voice_output          import text_to_speech
+from src.vitals                import METRICS, add_reading, load_vitals, status, status_color, clear_vitals, latest
+from src.drug_interaction      import check_interaction
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
@@ -601,6 +603,117 @@ with st.sidebar:
         _idx = _titles.index(_sel)
         st.markdown(fa_html(_cards[_idx]), unsafe_allow_html=True)
 
+    # ── Vitals Tracker ────────────────────────────────────────────────────────
+    with st.expander("📈 Health Vitals Tracker"):
+        import plotly.graph_objects as go
+
+        _vdata = load_vitals()
+
+        # Log new reading
+        st.markdown("<p style='color:#C9D1D9;font-size:13px;font-weight:600;margin-bottom:6px'>Log Today's Reading</p>", unsafe_allow_html=True)
+        _vc1, _vc2 = st.columns(2)
+        with _vc1:
+            _v_sys  = st.number_input("Systolic BP",  60,  220, step=1, value=None, placeholder="mmHg", key="v_sys")
+            _v_glu  = st.number_input("Blood Glucose", 50, 500, step=1, value=None, placeholder="mg/dL", key="v_glu")
+            _v_spo2 = st.number_input("SpO₂ %",       50,  100, step=1, value=None, placeholder="%",    key="v_spo2")
+        with _vc2:
+            _v_dia  = st.number_input("Diastolic BP",  40, 140, step=1, value=None, placeholder="mmHg", key="v_dia")
+            _v_hr   = st.number_input("Heart Rate",    30, 220, step=1, value=None, placeholder="bpm",  key="v_hr")
+            _v_wt   = st.number_input("Weight",        20, 300, step=1, value=None, placeholder="kg",   key="v_wt")
+
+        if st.button("💾 Save Reading", use_container_width=True, key="save_vitals"):
+            _new = {k: v for k, v in {
+                "systolic_bp": _v_sys, "diastolic_bp": _v_dia,
+                "glucose": _v_glu, "heart_rate": _v_hr,
+                "weight": _v_wt, "spo2": _v_spo2,
+            }.items() if v is not None}
+            if _new:
+                add_reading(_new)
+                st.success("Reading saved.")
+                st.rerun()
+            else:
+                st.warning("Enter at least one value.")
+
+        # Current status summary
+        if _vdata:
+            st.markdown("<p style='color:#C9D1D9;font-size:13px;font-weight:600;margin:10px 0 6px'>Latest Values</p>", unsafe_allow_html=True)
+            _summary_html = "<div style='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px'>"
+            for _key, _cfg in METRICS.items():
+                _lv = latest(_key)
+                if _lv is None:
+                    continue
+                _sc = status_color(status(_key, _lv))
+                _summary_html += (
+                    f"<div style='background:#161B22;border:1px solid #21262D;border-radius:8px;"
+                    f"padding:6px 10px;min-width:80px'>"
+                    f"<div style='color:#8B949E;font-size:10px;font-weight:600'>{_cfg['label']}</div>"
+                    f"<div style='color:{_sc};font-size:16px;font-weight:700'>{_lv}</div>"
+                    f"<div style='color:#484F58;font-size:10px'>{_cfg['unit']}</div>"
+                    f"</div>"
+                )
+            _summary_html += "</div>"
+            st.markdown(_summary_html, unsafe_allow_html=True)
+
+            # Chart for each metric that has data
+            _dates = [e.get("date_display", e.get("timestamp",""))[:11] for e in _vdata]
+            for _key, _cfg in METRICS.items():
+                _vals = [e.get(_key) for e in _vdata]
+                _pairs = [(d, v) for d, v in zip(_dates, _vals) if v is not None]
+                if len(_pairs) < 2:
+                    continue
+                _xd, _yd = zip(*_pairs)
+                _fig = go.Figure()
+                _fig.add_trace(go.Scatter(
+                    x=list(_xd), y=list(_yd), mode="lines+markers",
+                    line=dict(color=_cfg["color"], width=2),
+                    marker=dict(size=6, color=_cfg["color"]),
+                    name=_cfg["label"],
+                ))
+                # Add normal range band
+                if _cfg.get("normal"):
+                    _fig.add_hrect(
+                        y0=_cfg["normal"][0], y1=_cfg["normal"][1],
+                        fillcolor="rgba(63,185,80,0.08)", line_width=0,
+                        annotation_text="Normal", annotation_position="right",
+                        annotation=dict(font_size=10, font_color="#3FB950"),
+                    )
+                _fig.update_layout(
+                    title=dict(text=f"{_cfg['label']} ({_cfg['unit']})", font=dict(color="#C9D1D9", size=13)),
+                    paper_bgcolor="#0D1117", plot_bgcolor="#161B22",
+                    height=200, margin=dict(l=10, r=10, t=30, b=10),
+                    xaxis=dict(tickfont=dict(color="#8B949E", size=10), gridcolor="#21262D", showgrid=True),
+                    yaxis=dict(tickfont=dict(color="#8B949E", size=10), gridcolor="#21262D", showgrid=True),
+                    showlegend=False,
+                )
+                st.plotly_chart(_fig, use_container_width=True)
+
+            if st.button("🗑️ Clear Vitals History", use_container_width=True, key="clear_vitals"):
+                clear_vitals()
+                st.rerun()
+        else:
+            st.caption("No readings yet. Log your first reading above.")
+
+    # ── Drug Interaction Checker ──────────────────────────────────────────────
+    with st.expander("💊 Drug Interaction Checker"):
+        st.caption("Check if two medicines are safe to take together.")
+        _d1 = st.text_input("Medicine 1", placeholder="e.g. Metformin", key="di_d1")
+        _d2 = st.text_input("Medicine 2", placeholder="e.g. Ibuprofen", key="di_d2")
+        if st.button("Check Interaction", use_container_width=True, key="di_check"):
+            if _d1.strip() and _d2.strip():
+                with st.spinner("Checking interaction…"):
+                    _di = check_interaction(_d1, _d2)
+                st.markdown(
+                    f"<div style='background:#161B22;border:1px solid {_di['color']}33;"
+                    f"border-left:3px solid {_di['color']};border-radius:10px;padding:12px 14px;margin-top:8px'>"
+                    f"<div style='color:{_di['color']};font-size:13px;font-weight:700;text-transform:uppercase;"
+                    f"letter-spacing:.8px;margin-bottom:8px'>{_di['label']}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown(_di["explanation"])
+            else:
+                st.warning("Enter both medicine names.")
+
     # ── Medical History ───────────────────────────────────────────────────────
     with st.expander("📋 Consultation History"):
         _hist = load_history()
@@ -663,6 +776,8 @@ with st.sidebar:
         "⚖️ BMI Calculator",
         "🌐 Multilingual Support",
         "💊 Prescription Decoder",
+        "📈 Vitals Tracker",
+        "🔗 Drug Interaction Checker",
     ]:
         st.markdown(f"- {_f}")
 
@@ -691,6 +806,45 @@ st.markdown(
     "</div>",
     unsafe_allow_html=True,
 )
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEASONAL DISEASE ALERT BANNER
+# ─────────────────────────────────────────────────────────────────────────────
+if _env:
+    _season_val = _env.get("season", "")
+    _weather_val = _env.get("weather") or {}
+    _temp_val = _weather_val.get("temp_c")
+
+    _alert = None
+    if _season_val == "Monsoon":
+        _alert = ("🦟", "#E5B000", "Monsoon Alert",
+                  "High season for Dengue, Malaria & Typhoid. Use mosquito repellent, drink only boiled or filtered water, and avoid street food.")
+    elif _season_val == "Summer" and _temp_val and _temp_val >= 38:
+        _alert = ("🌡️", "#FFA040", "Extreme Heat Alert",
+                  f"Current temperature {_temp_val}°C — high risk of Heatstroke & Dehydration. Stay indoors during peak hours, drink 3–4 litres of water daily.")
+    elif _season_val == "Summer" and _temp_val and _temp_val >= 33:
+        _alert = ("☀️", "#E5B000", "Heat Advisory",
+                  f"Temperature {_temp_val}°C — elevated risk of Dehydration & Heat Exhaustion. Keep hydrated and avoid prolonged sun exposure.")
+    elif _season_val == "Winter":
+        _alert = ("🌬️", "#58A6FF", "Winter Health Notice",
+                  "Cold season — higher risk of Influenza, Pneumonia & Respiratory infections. Wash hands frequently and consider a flu vaccine.")
+    elif _season_val == "Post-Monsoon":
+        _alert = ("🌧️", "#8B949E", "Post-Monsoon Advisory",
+                  "Residual mosquito breeding season — Dengue and Chikungunya remain a risk. Eliminate stagnant water around your home.")
+
+    if _alert:
+        _ic, _ac, _at, _am = _alert
+        st.markdown(
+            f"<div style='background:rgba({','.join(str(int(int(_ac.lstrip('#')[i:i+2],16)) ) for i in (0,2,4))},.08);"
+            f"border:1px solid {_ac}44;border-left:4px solid {_ac};border-radius:12px;"
+            f"padding:12px 18px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px'>"
+            f"<span style='font-size:22px;line-height:1'>{_ic}</span>"
+            f"<div><div style='color:{_ac};font-size:13px;font-weight:700;text-transform:uppercase;"
+            f"letter-spacing:.8px;margin-bottom:3px'>{_at}</div>"
+            f"<div style='color:#C9D1D9;font-size:14px;line-height:1.6'>{_am}</div></div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TABS
@@ -1049,6 +1203,35 @@ def run_analysis(prompt_text: str):
 
 # ══════════════════════════ CONSULTATION TAB ══════════════════════════════════
 with _tab_chat:
+
+    # ── Demo Mode — shown only when chat is empty ─────────────────────────────
+    if not st.session_state.messages:
+        st.markdown(
+            "<div style='text-align:center;padding:20px 0 8px'>"
+            "<p style='color:#484F58;font-size:13px;font-weight:600;text-transform:uppercase;"
+            "letter-spacing:1.2px;margin-bottom:16px'>Try an example</p>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        _demo_queries = [
+            ("🤒", "I have high fever and body ache since 2 days. What should I do?"),
+            ("💊", "What is the dosage of paracetamol for adults? Are there any side effects?"),
+            ("🩸", "My fasting blood sugar is 130 mg/dL. Is that normal? What should I eat?"),
+            ("🫀", "What are the early signs of a heart attack I should never ignore?"),
+            ("🦟", "How do I know if I have dengue fever and what is the treatment?"),
+            ("😴", "I have been getting very poor sleep for weeks. What are the health risks?"),
+        ]
+        _demo_cols = st.columns(3)
+        for _di, (_icon, _q) in enumerate(_demo_queries):
+            with _demo_cols[_di % 3]:
+                if st.button(
+                    f"{_icon} {_q[:45]}…" if len(_q) > 45 else f"{_icon} {_q}",
+                    use_container_width=True,
+                    key=f"demo_{_di}",
+                ):
+                    run_analysis(_q)
+                    st.rerun()
+        st.markdown("<br>", unsafe_allow_html=True)
 
     # PDF download button
     if st.session_state.messages:
